@@ -55,3 +55,6 @@ details{margin:8px 0}summary{cursor:pointer}
 .vpage{writing-mode:vertical-rl;font:19px/1.75 "Songti TC","Noto Serif TC","PMingLiU",serif;white-space:pre;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:16px;max-width:100%;overflow-x:auto;height:30em;margin-left:auto}
 #go{padding:3px 6px;border:1px solid var(--line);border-radius:5px;background:var(--card);color:var(--fg);font-size:15px}
 nav{flex-wrap:wrap}
+
+#langs{display:flex;gap:2px;margin-left:8px}#langs button{font:inherit;font-size:13px;padding:3px 8px;border:1px solid var(--line);background:none;color:inherit;border-radius:4px;cursor:pointer}
+#langs button[aria-current]{background:var(--acc);color:#fff;border-color:var(--acc)}

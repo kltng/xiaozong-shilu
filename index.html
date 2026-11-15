@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="zh-Hant">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -9,14 +9,15 @@
 </head>
 <body>
 <header>
-  <a class="brand" href="#/">明孝宗實錄</a>
+  <a class="brand" href="#/" lang="zh-Hant">明孝宗實錄</a>
   <nav>
-    <a href="#/">Browse</a><a href="#/persons">Persons</a><a href="#/places">Places</a><a href="#/page/seq-0058">Pages</a><a href="#/process">How it was made</a><a href="#/downloads">Downloads</a><a href="#/about">About</a>
+    <a href="#/" data-i18n="Browse">Browse</a><a href="#/persons" data-i18n="Persons">Persons</a><a href="#/places" data-i18n="Places">Places</a><a href="#/page/seq-0058" data-i18n="Pages">Pages</a><a href="#/process" data-i18n="How it was made">How it was made</a><a href="#/downloads" data-i18n="Downloads">Downloads</a><a href="#/about" data-i18n="About">About</a>
   </nav>
-  <form id="searchform"><input id="q" type="search" placeholder="搜尋 search the text" autocomplete="off"></form>
+  <form id="searchform"><input id="q" type="search" placeholder="search the text" autocomplete="off"></form>
+  <span id="langs" aria-label="Language"></span>
 </header>
-<div class="draft">Draft. The text is machine-read (OCR) and not proofread. Person and place links were made by rules and have not been reviewed.</div>
-<main id="main"><p class="loading">Loading the records…</p></main>
+<div class="draft" data-i18n="Draft. The text is machine-read (OCR) and not proofread. Person and place links were made by rules and have not been reviewed.">Draft. The text is machine-read (OCR) and not proofread. Person and place links were made by rules and have not been reviewed.</div>
+<main id="main"><p class="loading" data-i18n="Loading the records…">Loading the records…</p></main>
 <aside id="panel" hidden></aside>
 <script src="app.js"></script>
 </body>
