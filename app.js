@@ -157,7 +157,7 @@ ${e.recs.length > shown ? `<p><button id="morebtn" class="filter">Show 100 more 
 <figure><img src="figures/fig1_pipeline.svg" alt="The pipeline in nine steps"><figcaption>Steps 00 to 08, the check on each, and where the historian decides. Step 09 (persons and places) came after this figure was drawn.</figcaption></figure>
 <p><b>Time:</b> six calendar days; about 46.5 hours of machine time, of which the OCR is 43.1 hours; and a few hours of attention from the historian. <a href="#/time">The count, step by step</a>.</p>
 <h2>The steps</h2><div class="steps">${P.steps.map(s => `<a class="stepcard" href="#/step/${s.id}"><b>${s.id}</b><span>${esc(s.title)}</span></a>`).join("")}
-<a class="stepcard" href="#/time"><b>time</b><span>Time used, step by step</span></a><a class="stepcard" href="#/journal"><b>log</b><span>The journal, day by day</span></a><a class="stepcard" href="#/downloads"><b>files</b><span>Downloads</span></a></div>
+<a class="stepcard" href="#/compare"><b>test</b><span>Two readers compared: Codex and Qwen</span></a><a class="stepcard" href="#/time"><b>time</b><span>Time used, step by step</span></a><a class="stepcard" href="#/journal"><b>log</b><span>The journal, day by day</span></a><a class="stepcard" href="#/downloads"><b>files</b><span>Downloads</span></a></div>
 <h2>The map of the work</h2><div class="md">${P.readme}</div>`;
   },
   async step(id) {
@@ -165,6 +165,28 @@ ${e.recs.length > shown ? `<p><button id="morebtn" class="filter">Show 100 more 
     const S = await fetch(`data/steps/${id}.json`).then(r => r.json()), a = P.steps[x - 1], b = P.steps[x + 1];
     const pg = `<div class="pager"><span>${a ? `<a href="#/step/${a.id}">← ${a.id} ${esc(a.title)}</a>` : `<a href="#/process">← overview</a>`}</span><span>${b ? `<a href="#/step/${b.id}">${b.id} ${esc(b.title)} →</a>` : `<a href="#/journal">the journal →</a>`}</span></div>`;
     main.innerHTML = `<p class="mute small"><a href="#/process">How it was made</a> › step ${id}</p>${pg}<div class="steppage">${S.html}</div>${pg}`;
+  },
+  async compare() {
+    const C = await fetch("data/compare.json").then(r => r.json());
+    const who = x => x ? "Qwen" : "Codex";
+    const callrow = c => `<tr><td>${who(c[0])}</td><td>${esc(c[1])}</td><td class="n">${c[2]}</td><td class="n">${c[3]}</td><td class="n">${c[4]}</td><td class="n">${c[5]}</td><td><code>${esc(c[6])}</code></td></tr>`;
+    main.innerHTML = `<p class="mute small"><a href="#/process">How it was made</a> › <a href="#/step/09">step 09</a> › experiment</p><div class="md">${C.html}</div>
+<h2>Every call</h2><p class="mute small">Seconds are for one batch of 25 records. Codex ran three batches at once, so its clock time is shorter than the sum. Codex's tokens were counted for the run as a whole, not per batch. The last column is the start of the prompt's fingerprint: the same in both runs.</p>
+<table class="sample"><thead><tr><th>reader</th><th>batch</th><th class="n">records</th><th class="n">seconds</th><th class="n">tokens in</th><th class="n">tokens out</th><th>prompt</th></tr></thead><tbody>${C.calls.map(callrow).join("")}</tbody></table>
+<h2>Every difference</h2><p>Each row is a string that one reader returned for a record and the other did not. Nobody has judged which reader is right. ${C.link}</p>
+<p><select id="cw"><option value="">both readers</option><option value="0">only Codex</option><option value="1">only Qwen</option></select>
+<select id="ct"><option value="">persons and places</option><option value="0">persons</option><option value="1">places</option></select>
+<input id="cq" placeholder="filter by text, record or rule" size="28"> <span id="cn" class="mute small"></span></p>
+<table class="sample"><thead><tr><th>only in</th><th>type</th><th>record</th><th>string</th><th>kind</th><th>what the linking rules did</th><th>linked to</th></tr></thead><tbody id="cb"></tbody></table>
+<h2>Code</h2>${C.code}`;
+    const draw = () => {
+      const w = cw.value, t = ct.value, q = cq.value.trim();
+      const rows = C.rows.filter(r => (w === "" || +r[0] === +w) && (t === "" || +r[1] === +t) && (!q || (r[2] + " " + r[3] + " " + r[5] + " " + r[6]).includes(q)));
+      cn.textContent = rows.length + " of " + C.rows.length;
+      cb.innerHTML = rows.map(r => `<tr><td>${who(r[0])}</td><td>${r[1] ? "place" : "person"}</td><td><a href="#/rec/${encodeURIComponent(r[2])}">${esc(r[2])}</a></td><td>${esc(r[3])}</td><td>${esc(r[4])}</td><td>${esc(r[5])}</td><td>${esc(r[6])}</td></tr>`).join("");
+    };
+    const cw = document.getElementById("cw"), ct = document.getElementById("ct"), cq = document.getElementById("cq"), cn = document.getElementById("cn"), cb = document.getElementById("cb");
+    cw.onchange = ct.onchange = draw; cq.oninput = draw; draw();
   },
   async time() {
     const P = await proc();
@@ -206,7 +228,7 @@ function route() {
   else if (a === "persons") V.entlist(0); else if (a === "places") V.entlist(1);
   else if (a === "person") V.ent(0, b); else if (a === "place") V.ent(1, b);
   else if (a === "search") V.search(b || ""); else if (a === "about") V.about();
-  else if (a === "process") V.process(); else if (a === "step") V.step(b); else if (a === "journal") V.journal(); else if (a === "time") V.time();
+  else if (a === "process") V.process(); else if (a === "step") V.step(b); else if (a === "journal") V.journal(); else if (a === "time") V.time(); else if (a === "compare") V.compare();
   else if (a === "downloads") V.downloads(); else if (a === "page") V.page(b); else V.missing();
   if (!keep) scrollTo(0, 0);
 }
