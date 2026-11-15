@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>明孝宗實錄: persons and places, pilot links</title>
+<style>
+  :root{
+    --bg:#f5f3ee; --ink:#2c2416; --ink-soft:#1a1208; --muted:#7a6a50; --muted2:#9a8870;
+    --card:#ffffff; --line:#d9d2c5; --line-soft:#ede8df; --panel:#ede8df;
+    --header-bg:#2c2416; --header-ink:#f5f3ee;
+    --accent:#c8a060; --accent-hi:#dfc08a; --accent-lo:#b8945a; --accent-ink:#2c2416;
+    --reviewed:#8aad6e; --mark:#fff0a0; --hover:#faf8f4;
+    --score-high:#5a8a30; --score-med:#c88020; --score-low:#a06030;
+    --serif:Georgia,"Times New Roman",serif; --mono:"Courier New",monospace;
+  }
+  *,*::before,*::after{box-sizing:border-box;}
+  body{font-family:var(--serif);background:var(--bg);color:var(--ink);margin:0;padding:0;}
+
+  header{background:var(--header-bg);color:var(--header-ink);padding:0.9rem 1.5rem;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,0.35);}
+  .header-top{display:flex;align-items:baseline;justify-content:space-between;gap:1rem;flex-wrap:wrap;}
+  header h1{margin:0;font-size:1.05rem;font-weight:normal;letter-spacing:0.03em;}
+  header .subtitle{margin:0.15rem 0 0;font-size:0.82rem;opacity:0.7;}
+  .header-actions{display:flex;align-items:center;gap:0.5rem;flex-shrink:0;}
+  .btn{background:var(--accent);color:var(--accent-ink);border:none;padding:0.4rem 0.9rem;border-radius:4px;font-size:0.82rem;font-weight:bold;font-family:var(--serif);cursor:pointer;white-space:nowrap;transition:background 0.15s;}
+  .btn:hover{background:var(--accent-hi);}
+  .btn:active{background:var(--accent-lo);}
+  .btn.ghost{background:rgba(255,255,255,0.12);color:var(--header-ink);font-weight:normal;}
+  .btn.ghost:hover{background:rgba(255,255,255,0.22);}
+  .header-progress-row{display:flex;align-items:center;gap:0.75rem;margin-top:0.55rem;}
+  #progress-counter{font-size:0.78rem;color:var(--accent);white-space:nowrap;flex-shrink:0;}
+  #progress-bar-wrap{flex:1;height:5px;background:rgba(255,255,255,0.15);border-radius:3px;overflow:hidden;}
+  #progress-bar{height:100%;width:0%;background:var(--accent);border-radius:3px;transition:width 0.25s ease;}
+
+  main{max-width:920px;margin:2rem auto;padding:0 1.25rem 5rem;}
+
+  .entry{background:var(--card);border:1px solid var(--line);border-radius:6px;margin-bottom:1.75rem;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,0.07);transition:box-shadow 0.2s,border-color 0.2s;scroll-margin-top:6.5rem;}
+  .entry.reviewed{border-color:var(--reviewed);box-shadow:0 1px 4px rgba(80,140,60,0.18);}
+  .entry.kbd-focus{box-shadow:0 0 0 2px var(--accent),0 1px 8px rgba(0,0,0,0.12);}
+
+  .entry-header{background:var(--panel);padding:0.5rem 1rem;display:flex;align-items:center;gap:0.75rem;border-bottom:1px solid var(--line);}
+  .entry-num{font-size:0.75rem;font-weight:bold;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;white-space:nowrap;}
+  .reviewed-badge{font-size:0.7rem;background:var(--reviewed);color:#fff;border-radius:20px;padding:0.1rem 0.6rem;font-weight:bold;letter-spacing:0.04em;display:none;}
+  .entry.reviewed .reviewed-badge{display:inline-block;}
+
+  .source{padding:0.9rem 1.1rem 0.8rem;font-size:1.1rem;line-height:1.8;color:var(--ink-soft);border-bottom:1px solid var(--line-soft);}
+  .context{padding:0.35rem 1.1rem;font-size:0.82rem;color:var(--muted);background:var(--hover);border-bottom:1px solid var(--line-soft);}
+  .context .ctx-row{margin:0.1rem 0;}
+  .context .ctx-label{font-weight:bold;color:var(--muted2);}
+
+  .question{padding:0.6rem 0.85rem 0.7rem;border-bottom:1px solid var(--line-soft);}
+  .question:last-child{border-bottom:none;}
+  .q-prompt{font-size:0.92rem;font-weight:bold;color:#4a3c28;margin:0 0 0.4rem;padding:0.15rem 0.25rem;}
+  .question.reviewed .q-prompt{color:var(--reviewed);}
+
+  .cand-list{list-style:none;margin:0;padding:0;}
+  .cand{display:flex;align-items:baseline;gap:0.55rem;cursor:pointer;padding:0.35rem 0.5rem;border-radius:4px;transition:background 0.12s;margin:0;}
+  .cand:hover{background:var(--hover);}
+  .cand input{flex-shrink:0;margin:0;width:15px;height:15px;accent-color:var(--accent-lo);cursor:pointer;position:relative;top:2px;}
+  .cand-id{font-family:var(--mono);font-size:0.8rem;color:var(--muted);white-space:nowrap;flex-shrink:0;}
+  .cand-main{flex:1;min-width:0;}
+  .cand-title{font-size:0.97rem;color:var(--ink);line-height:1.4;}
+  .cand-excerpt{font-size:0.88rem;color:var(--ink);line-height:1.55;}
+  .cand-reason{margin-top:0.2rem;font-size:0.78rem;color:var(--muted);font-style:italic;}
+  .cand-score{font-size:0.78rem;white-space:nowrap;flex-shrink:0;}
+  .score-high{color:var(--score-high);} .score-med{color:var(--score-med);} .score-low{color:var(--score-low);}
+  mark{background:var(--mark);color:inherit;border-radius:2px;padding:0 1px;}
+
+  .none-row{margin-top:0.2rem;border-top:1px dashed var(--line);padding-top:0.35rem;}
+  .none-row .cand-title{font-style:italic;color:var(--muted);}
+  .none-row:hover{background:#fdf2ef;}
+
+  .no-candidates{font-style:italic;color:var(--muted2);font-size:0.88rem;margin:0.3rem 0.5rem;}
+
+  details.excluded{margin:0.3rem 0.25rem 0;}
+  details.excluded>summary{font-size:0.78rem;color:var(--muted2);cursor:pointer;user-select:none;padding:0.25rem 0.25rem;list-style:none;}
+  details.excluded>summary::-webkit-details-marker{display:none;}
+  details.excluded>summary::before{content:"\25B8\00a0";color:var(--muted2);}
+  details.excluded[open]>summary::before{content:"\25BE\00a0";}
+  details.excluded .cand{opacity:0.75;}
+  details.excluded .cand-title,details.excluded .cand-excerpt{color:var(--muted);}
+
+  .rating-row{display:flex;flex-wrap:wrap;gap:0.4rem;padding:0.2rem 0.4rem;}
+  .rate-btn,.bool-btn{font-family:var(--serif);font-size:0.9rem;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:4px;padding:0.35rem 0.85rem;cursor:pointer;transition:all 0.12s;min-width:2.4rem;}
+  .rate-btn:hover,.bool-btn:hover{border-color:var(--accent);background:var(--hover);}
+  .rate-btn.active{background:var(--accent);border-color:var(--accent-lo);color:var(--accent-ink);font-weight:bold;}
+  .bool-btn.active-yes{background:var(--reviewed);border-color:var(--reviewed);color:#fff;font-weight:bold;}
+  .bool-btn.active-no{background:#c0603a;border-color:#a04a28;color:#fff;font-weight:bold;}
+  .rate-caption{font-size:0.76rem;color:var(--muted);padding:0.1rem 0.5rem 0;}
+
+  .text-answer,.notes-input{width:100%;font-family:var(--serif);font-size:0.9rem;color:var(--ink);border:1px solid var(--line);border-radius:3px;padding:0.4rem 0.55rem;background:var(--hover);resize:vertical;line-height:1.5;}
+  .text-answer:focus,.notes-input:focus{outline:none;border-color:var(--accent);}
+  .notes-wrap{padding:0.4rem 0.5rem 0.1rem;}
+  .notes-label{font-size:0.74rem;color:var(--muted2);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.2rem;}
+
+  #restore-banner{display:none;max-width:920px;margin:1rem auto -0.5rem;padding:0.55rem 1rem;background:#fbf3df;border:1px solid var(--accent);border-radius:5px;font-size:0.84rem;color:var(--ink);align-items:center;gap:0.75rem;}
+  #restore-banner.show{display:flex;}
+  #restore-banner .spacer{flex:1;}
+  .link-btn{background:none;border:none;color:var(--accent-lo);text-decoration:underline;cursor:pointer;font-family:var(--serif);font-size:0.84rem;padding:0;}
+
+  #help-overlay{display:none;position:fixed;inset:0;background:rgba(20,16,8,0.55);z-index:200;align-items:center;justify-content:center;}
+  #help-overlay.show{display:flex;}
+  .help-card{background:var(--card);color:var(--ink);max-width:440px;width:90%;border-radius:8px;padding:1.3rem 1.5rem;box-shadow:0 8px 40px rgba(0,0,0,0.4);}
+  .help-card h2{margin:0 0 0.8rem;font-size:1.05rem;font-weight:normal;}
+  .help-card table{width:100%;border-collapse:collapse;font-size:0.86rem;}
+  .help-card td{padding:0.25rem 0.3rem;border-bottom:1px solid var(--line-soft);vertical-align:top;}
+  .help-card kbd{font-family:var(--mono);background:var(--panel);border:1px solid var(--line);border-radius:3px;padding:0.05rem 0.4rem;font-size:0.8rem;}
+  .help-close{margin-top:1rem;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-top">
+    <div>
+      <h1 id="doc-title"></h1>
+      <p class="subtitle" id="doc-subtitle"></p>
+    </div>
+    <div class="header-actions">
+      <button class="btn ghost" id="help-btn" title="Keyboard shortcuts (?)">?</button>
+      <button class="btn ghost" id="load-btn" title="Load a previously downloaded results file">Load</button>
+      <button class="btn" id="download-btn">Download Results</button>
+      <input type="file" id="load-input" accept="application/json,.json" style="display:none">
+    </div>
+  </div>
+  <div class="header-progress-row">
+    <span id="progress-counter">0 / 0 reviewed</span>
+    <div id="progress-bar-wrap"><div id="progress-bar"></div></div>
+  </div>
+</header>
+
+<div id="restore-banner">
+  <span id="restore-text">Restored your in-progress review from this browser.</span>
+  <span class="spacer"></span>
+  <button class="link-btn" id="restore-discard">Start over</button>
+</div>
+
+<main id="root"></main>
+
+<div id="help-overlay">
+  <div class="help-card">
+    <h2>Keyboard shortcuts</h2>
+    <table>
+      <tr><td><kbd>j</kbd> / <kbd>&darr;</kbd></td><td>Next question</td></tr>
+      <tr><td><kbd>k</kbd> / <kbd>&uarr;</kbd></td><td>Previous question</td></tr>
+      <tr><td><kbd>1</kbd>&ndash;<kbd>9</kbd></td><td>Select / toggle the Nth option (or rating)</td></tr>
+      <tr><td><kbd>n</kbd></td><td>Toggle &ldquo;None of the above&rdquo;</td></tr>
+      <tr><td><kbd>?</kbd></td><td>Toggle this help</td></tr>
+      <tr><td><kbd>Esc</kbd></td><td>Close help</td></tr>
+    </table>
+    <p style="font-size:0.78rem;color:var(--muted);margin:0.8rem 0 0;">Your progress is saved automatically in this browser. Use <b>Download Results</b> to export, and <b>Load</b> to resume from a downloaded file.</p>
+    <button class="btn help-close" id="help-close">Close</button>
+  </div>
+</div>
+
+<script>
+"use strict";
+const CONFIG = {"title": "明孝宗實錄: persons and places, pilot links", "subtitle": "Is the linked CBDB person or TGAZ place the one the record means?", "lang": "zh-Hant", "cjk": true, "result_filename": "entities_review_results_full.json", "storage_key": "xiaozong-entities-full-20261113"};
+const DATA = [{"id": "person|041-0001+2|福|485077", "heading": "person · 041-0001+2 · 1490-08-27 · “劉福”", "source": "癸未初寧晉伯劉福叔祖太監劉永誠蒙賜武清縣利上屯莊田二百五十餘頃因侵占牧馬草場地二百餘頃積租米至十五萬石銀至四千餘兩比奉旨欽賞莊田其人已故者收入官每三十頃遞五頃與其遺嗣福得留四十一頃有奇至是巡按監察", "source_html": true, "context": [{"label": "Linked to", "value": "CBDB 485077: 劉福, born ?, died ?, index year ?. Postings: 副千戶 -; 同知 -; 鎮撫 -; 指揮使 -"}, {"label": "How", "value": "office-elsewhere (weak); 19 of 33 candidates left after the filters"}], "questions": [{"id": "q1", "type": "single", "prompt": "Is this the right person?", "notes": true, "candidates": [{"id": "right", "label": "Right"}, {"id": "wrong", "label": "Wrong"}, {"id": "cannot-tell", "label": "Cannot tell"}]}]}, {"id": "person|007-0034|劉吉|67530", "heading": "person · 007-0034 · 1487-12-21 · “劉吉”", "source": "大學士劉吉言臣閏天生賢才以當世用存人居審其高下而舉用之如賢者不用而所用非賢則挫人心違天道而咎徵見暴懼我  先帝寬仁之德知人之明度越前代帝王遠甚然當時廷臣如給事中劉昂趙良劉昂董吳御史張珍于大節", "source_html": true, "context": [{"label": "Linked to", "value": "CBDB 67530: 劉吉, born 1427, died 1493, index year 1427. Postings: 經筵講官 -; 翰林院庶吉士 1448-1449; 翰林院編修 1449-1456; 經筵官 1450-; 修撰 1456-1463; 鄉試官 1462-; 侍讀 1464-1467; 修撰 1464-"}, {"label": "How", "value": "office-elsewhere (weak); 2 of 9 candidates left after the filters"}], "questions": [{"id": "q1", "type": "single", "prompt": "Is this the right person?", "notes": true, "candidates": [{"id": "right", "label": "Right"}, {"id": "wrong", "label": "Wrong"}, {"id": "cannot-tell", "label": "Cannot tell"}]}]}, {"id": "person|213-0045|高瑛|281501", "heading": "person · 213-0045 · 1504-08-08 · “高瑛”", "source": "虜數入薊州瀋家口等處殺掠人畜鎮巡等官奏其事命把總指揮甘淋等待地方寧日遣問副總兵白琮左參將高瑛守備監丞邢玉羅觀養奉御張謙等俱宥之瑛仍罰俸一月", "source_html": true, "context": [{"label": "Linked to", "value": "CBDB 281501: 高瑛, born ?, died ?, index year 1456. Postings: 都指揮僉事 -; 右參將 -"}, {"label": "How", "value": "office-elsewhere (weak); 3 of 8 candidates left after the filters"}], "questions": [{"id": "q1", "type": "single", "prompt": "Is this the right person?", "notes": true, "candidates": [{"id": "right", "label": "Right"}, {"id": "wrong", "label": "Wrong"}, {"id": "cannot-tell", "label": "Cannot tell"}]}]}, {"id": "person|028-0052|張海|452465", "heading": "person · 028-0052 · 1489-08-22 · “張海”", "source": "順天府府尹張海等言本府并永平河間保定等府所屬州縣水潦為患民不聊生前寄養及季為并牛驢倒夫追償未完者請暫停免待堂徐之日追補其管馬官坐欠馬停俸者亦請暫令支給以養其廉從之", "source_html": true, "context": [{"label": "Linked to", "value": "CBDB 452465: 張海, born ?, died ?, index year ?. Postings: 典史 -; 監察御史 -"}, {"label": "How", "value": "office-elsewhere (weak); 19 of 27 candidates left after the filters"}], "questions": [{"id": "q1", "type": "single", "prompt": "Is this the right person?", "notes": true, "candidates": [{"id": "right", "label": "Right"}, {"id": "wrong", "label": "Wrong"}, {"id": "cannot-tell", "label": "Cannot tell"}]}]}, {"id": "person|094-0052|胡忠|467584", "heading": "person · 094-0052 · 1494-12-29 · “胡忠”", "source": "戊申錄莊浪衛紅城子堡等處設賊有功賞陞一級者二十六人給賞者五十人量賞者四百五十一人其分守少監紀能都指揮楊榮及守備都指揮等官魯麟文綿唐鳳王原兵備副使胡忠各賞紵絲二表裏", "source_html": true, "context": [{"label": "Linked to", "value": "CBDB 467584: 胡忠, born ?, died ?, index year ?. Postings: 都御史 -"}, {"label": "How", "value": "office-elsewhere (weak); 11 of 19 candidates left after the filters"}], "questions": [{"id": "q1", "type": "single", "prompt": "Is this the right person?", "notes": true, "candidates": [{"id": "right", "label": "Right"}, {"id": "wrong", "label": "Wrong"}, {"id": "cannot-tell", "label": "Cannot tell"}]}]}, {"id": "person|006-0009|左鈺|478980", "heading": "person · 006-0009 · 1487-11-26 · “左鈺”", "source": "巡撫順天等府都察院右副都御史彭韶巡撫山西右僉都御史左鈺乞致仕不允", "source_html": true, "context": [{"label": "Linked to", "value": "CBDB 478980: 左鈺, born ?, died ?, index year ?. Postings: 監察御史 -"}, {"label": "How", "value": "office-elsewhere (weak); 3 of 4 candidates left after the filters"}], "questions": [{"id": "q1", "type": "single", "prompt": "Is this the right person?", "notes": true, "candidates": [{"id": "right", "label": "Right"}, {"id": "wrong", "label": "Wrong"}, {"id": "cannot-tell", "label": "Cannot tell"}]}]}, {"id": "person|015-0005|傑|67819", "heading": "person · 015-0005 · 1488-07-20 · “董傑”", "source": "常欲効死圖報昨因侍經筵著汗浹背因思 聖體儼然不動萬一因暑致疾目子之心何安以是請暫止經筵且望 聖心嘗存聖賢之道雖停講旬月不為廢學目非是欲 陛下罷經筵而事逸豫故為容悅而要寵幸也今進士董傑等論列目固不能辭罪但目深負愧祿豈可復入朝班復居重位而為朝廷進退百官或顧罷歸田里以全者目之道 上曰衷情毀譽古今不允卿以齒德方隆侍任勿以小臣之言遽爾動心所辭不允時怒欲暫止經筵意實為他傑", "source_html": true, "context": [{"label": "Linked to", "value": "CBDB 67819: 董傑, born ?, died 1511, index year 1448. Postings: 刑部郎中 -; 刑部員外郎 -; 知府 -1508; 知州 -; 知府 -; 行都司經歷司都事 1489-; 右參政 1508-1509; 右布政使 1509-1510"}, {"label": "How", "value": "office-elsewhere (weak); 4 of 6 candidates left after the filters"}], "questions": [{"id": "q1", "type": "single", "prompt": "Is this the right person?", "notes": true, "candidates": [{"id": "right", "label": "Right"}, {"id": "wrong", "label": "Wrong"}, {"id": "cannot-tell", "label": "Cannot tell"}]}]}, {"id": "person|028-0062|張悅|347187", "heading": "person · 028-0062 · 1489-08-26 · “張悅”", "source": "丁丑改禮部右侍郎張悅為吏部右侍郎", "source_html": true, "context": [{"label": "Linked to", "value": "CBDB 347187: 張悅, born ?, died ?, index year 1430. Postings: 工部右侍郎 -; 吏部尚書 -; 吏部左侍郎 -; 太子少保 -; 提刑按察使司按察使 -; 提刑按察使司副使 -; 提刑按察使司僉事 -; 提刑按察使司僉事提督學校 -"}, {"label": "How", "value": "office-elsewhere (weak); 3 of 9 candidates left after the filters"}], "questions": [{"id": "q1", "type": "single", "prompt": "Is this the right person?", "notes": true, "candidates": [{"id": "right", "label": "Right"}, {"id": "wrong", "label": "Wrong"}, {"id": "cannot-tell", "label": "Cannot tell"}]}]}, {"id": "person|089-0035|王寧|245700", "heading": "person · 089-0035 · 1494-08-02 · “王寧”", "source": "務巡撫右副都御史鄭廷璫為右都御史仍巡撫地方協同統軍鎮守都督僉事王通署右都督隨軍紀功巡按御史黃玘為南京大理寺右寺丞又陞領兵右叅將趙威為都督僉事守備都指揮僉事劉英為都指揮同知都指揮同知王寧為都指揮使其餘官軍及土官人等九千六百四十餘人陞賞有差", "source_html": true, "context": [{"label": "Linked to", "value": "CBDB 245700: 王寧, born ?, died ?, index year 1441. Postings: 指揮使 -"}, {"label": "How", "value": "office-in-text (medium); 20 of 39 candidates left after the filters"}], "questions": [{"id": "q1", "type": "single", "prompt": "Is this the right person?", "notes": true, "candidates": [{"id": "right", "label": "Right"}, {"id": "wrong", "label": "Wrong"}, {"id": "cannot-tell", "label": "Cannot tell"}]}]}, {"id": "person|173-0089|邵蕃|128556", "heading": "person · 173-0089 · 1501-05-11 · “邵蕃”", "source": "山西道監察御史邵蕃丁憂服闋僕除四川道", "source_html": true, "context": [{"label": "Linked to", "value": "CBDB 128556: 邵蕃, born 1453, died 1545, index year 1453. Postings: 監察御史 -; 縣令 -; 巡鹽御史 -; 提學副使 -; 知縣 -"}, {"label": "How", "value": "office-in-text (medium); 1 of 1 candidates left after the filters"}], "questions": [{"id": "q1", "type": "single", "prompt": "Is this the right person?", "notes": true, "candidates": [{"id": "right", "label": "Right"}, {"id": "wrong", "label": "Wrong"}, {"id": "cannot-tell", "label": "Cannot tell"}]}]}, {"id": "person|007-0017|李榮|257290", "heading": "person · 007-0017 · 1487-12-15 · “李榮”", "source": "之由以為鑒戒至如吏部尚書李裕內閣學士戶直禮部侍郎黃景都御史劉敷素稱姦邪奔競無恥或責緣太監尚銘梁芳常與陳喜等以進用或附會小人事孜省邸常恩等以欺罔先帝壞天下之士風敗國家之禮法又大監蕭敬李榮景因科道彈劾罷黜後責緣復用遂捏拾言者之罪貶竄殆盡致官皆委靡不振而內外小人益肆奔競伏望明正典刑勿事姑息及將傳奉得官之人編發煙瘴邊方以示戒於天下臣言所未盡者乞許科道再從實指奏然後慎選端", "source_html": true, "context": [{"label": "Linked to", "value": "CBDB 257290: 李榮, born ?, died ?, index year ?. Postings: 監察御史 -; 御史 -"}, {"label": "How", "value": "office-in-text (medium); 39 of 70 candidates left after the filters"}], "questions": [{"id": "q1", "type": "single", "prompt": "Is this the right person?", "notes": true, "candidates": [{"id": "right", "label": "Right"}, {"id": "wrong", "label": "Wrong"}, {"id": "cannot-tell", "label": "Cannot tell"}]}]}, {"id": "person|155-0073|珍|320872", "heading": "person · 155-0073 · 1499-12-06 · “李珍”", "source": "令錦衣衛都指揮同知李珍之子吳世襲指揮使珍次監李榮從子也", "source_html": true, "context": [{"label": "Linked to", "value": "CBDB 320872: 李珍, born ?, died ?, index year ?. Postings: 指揮同知 -"}, {"label": "How", "value": "office-in-text (medium); 19 of 39 candidates left after the filters"}], "questions": [{"id": "q1", "type": "single", "prompt": "Is this the right person?", "notes": true, "candidates": [{"id": "right", "label": "Right"}, {"id": "wrong", "label": "Wrong"}, {"id": "cannot-tell", "label": "Cannot tell"}]}]}, {"id": "person|007-0044|林俊|24554", "heading": "person · 007-0044 · 1487-12-22 · “林俊”", "source": "謫之遠方以為人臣不忘之戒致仕尚書王恕王紘李東俱才德高茂志節忠貞去任傳請謝鐸緒修張元楨檢討陳獻章僉事章懋詳事黃仲昭俱學問淵博議論持正御史張珍徐鏞于大節給事中王微蕭顯賀欽主事王純員外郎林俊俱忠直故言武臣則指擯同知許寧庶能號重軍民推服至於在位之臣內則大監陳思道出同輩忠清守法外則尚書余子俊馬文升都御史彭韶少詹事楊守陳侍郎張悅或才或皆堪任使請禮昌用信任勿徒庶文武得人政事修", "source_html": true, "context": [{"label": "Linked to", "value": "CBDB 24554: 林俊, born 1452, died 1527, index year 1452. Postings: 都察院右僉都御史 -; 府判官 -; 刑部貴州司員外郎 -; 按察司副使 -; 按察使 -; 刑部陜西司主事 -; 刑部陜西司主事 1478-1484; 判官 1484-1485"}, {"label": "How", "value": "office-in-text (medium); 7 of 8 candidates left after the filters"}], "questions": [{"id": "q1", "type": "single", "prompt": "Is this the right person?", "notes": true, "candidates": [{"id": "right", "label": "Right"}, {"id": "wrong", "label": "Wrong"}, {"id": "cannot-tell", "label": "Cannot tell"}]}]}, {"id": "person|007-0024|張悅|347187", "heading": "person · 007-0024 · 1487-12-17 · “張悅”", "source": "改工部右侍郎張悅為禮部右侍郎", "source_html": true, "context": [{"label": "Linked to", "value": "CBDB 347187: 張悅, born ?, died ?, index year 1430. Postings: 工部右侍郎 -; 吏部尚書 -; 吏部左侍郎 -; 太子少保 -; 提刑按察使司按察使 -; 提刑按察使司副使 -; 提刑按察使司僉事 -; 提刑按察使司僉事提督學校 -"}, {"label": "How", "value": "office-in-text (medium); 3 of 9 candidates left after the filters"}], "questions": [{"id": "q1", "type": "single", "prompt": "Is this the right person?", "notes": true, "candidates": [{"id": "right", "label": "Right"}, {"id": "wrong", "label": "Wrong"}, {"id": "cannot-tell", "label": "Cannot tell"}]}]}, {"id": "person|198-0027|劉璣|132933", "heading": "person · 198-0027 · 1503-05-20 · “劉璣”", "source": "先是宣德間以天下衛所逃軍數多始議清軍條例差官清理立為分數其後委官團足三分之數有逃故丁盡戶絕者則里老妄報訛名情補或偽報年幼紀錄清理之後竟無單解徒解累人江西凡江府知府劉璣以為言兵部請行各處清軍御史嚴督各府委官稽覈究治其衛所間勾逃軍自宣德四年前則止照名清理對款登卷以後者仍照原定三分之數從之", "source_html": true, "context": [{"label": "Linked to", "value": "CBDB 132933: 劉璣, born 1457, died 1532, index year 1457. Postings: 知府 -; 知縣 -"}, {"label": "How", "value": "office-in-text (medium); 9 of 13 candidates left after the filters"}], "questions": [{"id": "q1", "type": "single", "prompt": "Is this the right person?", "notes": true, "candidates": [{"id": "right", "label": "Right"}, {"id": "wrong", "label": "Wrong"}, {"id": "cannot-tell", "label": "Cannot tell"}]}]}, {"id": "person|067-0044|蕙|470177", "heading": "person · 067-0044 · 1492-10-27 · “李蕙”", "source": "先是分守代州參將都指揮僉事王昇山西都指揮僉事江朴相訐奏下巡撫都御史楊澄巡按御史周琰會左布政使李蕙按察使熊紳鞠問昇自以己為參將而巡撫等官不曲庇之甚不平遂奏澄琰蕙紳不法事命刑部郎中陳忠大理寺左寺正朱英往勘昇坐冒領官銀私役軍士盜官米營私第朴坐擅離信地剝削軍士澄坐釋放罪人勸借銀兩公用", "source_html": true, "context": [{"label": "Linked to", "value": "CBDB 470177: 李蕙, born ?, died ?, index year ?. Postings: 都御史 -"}, {"label": "How", "value": "office-in-text (medium); 6 of 9 candidates left after the filters"}], "questions": [{"id": "q1", "type": "single", "prompt": "Is this the right person?", "notes": true, "candidates": [{"id": "right", "label": "Right"}, {"id": "wrong", "label": "Wrong"}, {"id": "cannot-tell", "label": "Cannot tell"}]}]}, {"id": "person|142-0013|見沛|67619", "heading": "person · 142-0013 · 1498-11-01 · “見沛”", "source": "增給徽王見沛兩淮鹽歲七百引從王請也", "source_html": true, "context": [{"label": "Linked to", "value": "CBDB 67619: 朱見沛, born 1462, died 1505, index year 1462. Postings: 徽王 1466-"}, {"label": "How", "value": "office-in-text+朱 (weak); 1 of 1 candidates left after the filters"}], "questions": [{"id": "q1", "type": "single", "prompt": "Is this the right person?", "notes": true, "candidates": [{"id": "right", "label": "Right"}, {"id": "wrong", "label": "Wrong"}, {"id": "cannot-tell", "label": "Cannot tell"}]}]}, {"id": "person|186-0030|奇溯|67301", "heading": "person · 186-0030 · 1502-05-26 · “奇溯”", "source": "晉府西河王奇溯不待有司奏請而輒選婚稱母命自納民人馬澄女既而王引咎請罪 上宥之輔導官令赴按監察御史逮問", "source_html": true, "context": [{"label": "Linked to", "value": "CBDB 67301: 朱奇溯, born 1472, died 1557, index year 1472. Postings: 西河王 1491-"}, {"label": "How", "value": "office-in-text+朱 (weak); 1 of 1 candidates left after the filters"}], "questions": [{"id": "q1", "type": "single", "prompt": "Is this the right person?", "notes": true, "candidates": [{"id": "right", "label": "Right"}, {"id": "wrong", "label": "Wrong"}, {"id": "cannot-tell", "label": "Cannot tell"}]}]}, {"id": "person|067-0007|誠泳|34608", "heading": "person · 067-0007 · 1492-10-05 · “誠泳”", "source": "癸酉秦王誠泳奏有風疾欲求本城外溫泉浴許之", "source_html": true, "context": [{"label": "Linked to", "value": "CBDB 34608: 朱誠泳, born 1458, died 1498, index year 1458. Postings: 鎮安王 -; 鎮安王 1468-1488; 秦王 1488-"}, {"label": "How", "value": "office-in-text+朱 (weak); 1 of 1 candidates left after the filters"}], "questions": [{"id": "q1", "type": "single", "prompt": "Is this the right person?", "notes": true, "candidates": [{"id": "right", "label": "Right"}, {"id": "wrong", "label": "Wrong"}, {"id": "cannot-tell", "label": "Cannot tell"}]}]}, {"id": "person|166-0037|張本|66903", "heading": "person · 166-0037 · 1500-10-24 · “張本”", "source": "陞兩淮都轉運鹽使司運使畢亨為湖廣布政司右參政江西吉安府知府張本為廣東右參政", "source_html": true, "context": [{"label": "Linked to", "value": "CBDB 66903: 張本, born 1437, died 1508, index year 1437. Postings: 工部營繕司主事 -; 右布政使 -; 知府 -; 都水司郎中 -; 巡撫 -; 工部營繕司員外郎 1481-1484; 都水司郎中 1484-; 知府 1486-"}, {"label": "How", "value": "office-in-text-dated (strong); 16 of 23 candidates left after the filters"}], "questions": [{"id": "q1", "type": "single", "prompt": "Is this the right person?", "notes": true, "candidates": [{"id": "right", "label": "Right"}, {"id": "wrong", "label": "Wrong"}, {"id": "cannot-tell", "label": "Cannot tell"}]}]}, {"id": "person|186-0045|張俊|67662", "heading": "person · 186-0045 · 1502-06-03 · “張俊”", "source": "兵部以巡按監察御史勘報大同左副總兵官姚信等失機之罪命信及遊擊將軍陳厯遠問如律遊擊將軍李祥張雄等仍待遷事寧日奏聞鎮守太監陸閏鑑兵官張俊都御史劉宇俱宥之", "source_html": true, "context": [{"label": "Linked to", "value": "CBDB 67662: 張俊, born ?, died 1519, index year 1456. Postings: 僉書管事 -; 萬全都指揮使司都指揮僉事 -; 衛指揮使 -; 遊擊將軍 -; 總兵官 -; 遊擊將軍 1498-; 都指揮同知 1499-1500; 都督僉事 1500-1510"}, {"label": "How", "value": "office-in-text-dated (strong); 19 of 46 candidates left after the filters"}], "questions": [{"id": "q1", "type": "single", "prompt": "Is this the right person?", "notes": true, "candidates": [{"id": "right", "label": "Right"}, {"id": "wrong", "label": "Wrong"}, {"id": "cannot-tell", "label": "Cannot tell"}]}]}, {"id": "person|118-0013|王恕|62505", "heading": "person · 118-0013 · 1496-11-19 · “王恕”", "source": "部尚書尹昊之禍構連無罪策當曰華是時華鄉人李孜省鄧常恩方獲寵華盡為計所希恩報怨取效且暮華又引萬安交李鄧為倚助安且親於萬內妃弟華為萬氏謀而萬深意一時朝士不附者多為所傾如大學士劉珝之去及王恕馬文升秦纘劉宣嚴璟華之相繼并逐皆華與安同謀也宣璟本華同鄉特嫉其近實不類已遂及之自成化丙午至弘治丁巳風癘十二年而卒人以為陰險無將之報乃如此初華之得參機務已實出自興機故天下人至今猶誦八", "source_html": true, "context": [{"label": "Linked to", "value": "CBDB 62505: 王恕, born 1416, died 1508, index year 1416. Postings: 兵部尚書 -; 大理寺左寺副 -1454; 戶部左侍郎 -; 刑部左侍郎 -; 總督河道 -; 刑部右侍郎 -; 吏部尚書 -; 太子太保 -"}, {"label": "How", "value": "office-in-text-dated (strong); 15 of 30 candidates left after the filters"}], "questions": [{"id": "q1", "type": "single", "prompt": "Is this the right person?", "notes": true, "candidates": [{"id": "right", "label": "Right"}, {"id": "wrong", "label": "Wrong"}, {"id": "cannot-tell", "label": "Cannot tell"}]}]}, {"id": "person|152-0075|屈伸|67805", "heading": "person · 152-0075 · 1499-09-08 · “屈伸”", "source": "壬午兵科右給事中屈伸奏泰寧等三衛建虜遁通來雖遣使入貢但恐陽為效順陰蓄異謀今歲春夏間遼東屢報虜衆入寇近邊住牧今又據虜中回者言三街道三百騎往興遠北虜酋脫羅干議和自遣貢虜使入關後宣府謀報虜營遁去遼東邊報亦少", "source_html": true, "context": [{"label": "Linked to", "value": "CBDB 67805: 屈伸, born 1460, died 1504, index year 1460. Postings: 禮科給事中 -1499; 翰林院庶吉士 1487-1489; 戶科給事中 1489-; 兵科右給事中 1499-1500; 吏科左給事中 1500-1501; 兵科都給事中 1501-1504"}, {"label": "How", "value": "office-in-text-dated (strong); 5 of 6 candidates left after the filters"}], "questions": [{"id": "q1", "type": "single", "prompt": "Is this the right person?", "notes": true, "candidates": [{"id": "right", "label": "Right"}, {"id": "wrong", "label": "Wrong"}, {"id": "cannot-tell", "label": "Cannot tell"}]}]}, {"id": "person|134-0016+16|楊廷和|68092", "heading": "person · 134-0016+16 · 1498-03-29 · “楊廷和”", "source": "侍講學士程敏政侍講學士楊守止左春左諭德李旻司經局洗馬梁儲充侍班官太常寺少卿兼侍讀學士李傑太常寺少卿兼侍講學士焦孝侍讀學士兼左諭德王鑒右諭德王肇洗馬楊傑侍讀剡機江濶白鐵侍講武衡左中允楊廷和右中允張天瑞左贊善嘗宏充講讀官編修兼校書吳儼斯音禮部員外郎兼正字周文通大理寺右寺副兼正字劉榮俱更直供事又以詹事府缺官管事請改政為詹事兼學士陞鑒為少詹事兼侍讀學士 上俱從之仍命溥及大", "source_html": true, "context": [{"label": "Linked to", "value": "CBDB 68092: 楊廷和, born 1459, died 1529, index year 1459. Postings: 華盖殿大學士 -; 日講官 -; 武宗實錄總裁官 -; 纂修官 -; 戶部尚書 -; 詹事府少詹事 -; 謹身殿大學士 -; 吏部尚書 -"}, {"label": "How", "value": "office-in-text-dated (strong); 1 of 1 candidates left after the filters"}], "questions": [{"id": "q1", "type": "single", "prompt": "Is this the right person?", "notes": true, "candidates": [{"id": "right", "label": "Right"}, {"id": "wrong", "label": "Wrong"}, {"id": "cannot-tell", "label": "Cannot tell"}]}]}, {"id": "person|216-0032|一清|68260", "heading": "person · 216-0032 · 1504-10-31 · “楊一清”", "source": "司議今後凡違持有犯如陝西三邊則行巡撫陝西都御史赴本鎮問理應體勘者則委布按二司分巡分守官不許轉委他人巡邊都御史致仕坐報備虧損者照公罪去任事發免問其烏銘之事幸久未決乞令提督馬政都御史楊一清問理蓋一清處心公恕故已事下都察院及刑部大理寺會議謂御史職居風憲凡大小諸司有不法事皆得糾舉巡撫都御史不緣問刑而設且各邊都御史與副參等官同事一方利害相關故凡有失誤兵部法司往往擬行巡按御", "source_html": true, "context": [{"label": "Linked to", "value": "CBDB 68260: 楊一清, born 1454, died 1530, index year 1454. Postings: 都御史 -; 副總裁 -; 巡撫 -; 中書舍人 -1487; 總裁官 -1526; 總督 -; 按察司副使 -; 僉事 -"}, {"label": "How", "value": "office-in-text-dated (strong); 3 of 3 candidates left after the filters"}], "questions": [{"id": "q1", "type": "single", "prompt": "Is this the right person?", "notes": true, "candidates": [{"id": "right", "label": "Right"}, {"id": "wrong", "label": "Wrong"}, {"id": "cannot-tell", "label": "Cannot tell"}]}]}, {"id": "person|055-0006|詔|67938", "heading": "person · 055-0006 · 1491-10-16 · “王詔”", "source": "南京兵部右侍郎王詔卒詔字文振真定趙州人天順八年進士授工科給事中論事務持文體 睿皇后崩值秋享 太廟時議為不當以卑廢尊詔言祀有喪不祭則移日請俟釋服行之雖不果行然議祀者不能屈遷都給事中典問列會奏起請致仕尚", "source_html": true, "context": [{"label": "Linked to", "value": "CBDB 67938: 王詔, born 1428, died 1491, index year 1428. Postings: 工科給事中 1465-1468; 工科左給事中 1468-1471; 工科都給事中 1471-1475; 右參政 1475-1478; 右參政 1481-1483; 右布政使 1483-1485; 都察院右副都御史 1488-1491; 左布政使 1488-"}, {"label": "How", "value": "office-in-text-dated (strong); 16 of 27 candidates left after the filters"}], "questions": [{"id": "q1", "type": "single", "prompt": "Is this the right person?", "notes": true, "candidates": [{"id": "right", "label": "Right"}, {"id": "wrong", "label": "Wrong"}, {"id": "cannot-tell", "label": "Cannot tell"}]}]}, {"id": "person|145-0029|吳世忠|67945", "heading": "person · 145-0029 · 1499-01-31 · “吳世忠”", "source": "壬寅賜蜀府鎮國將軍中鐵并夫人晉府輔國將軍奇渾哥港秦府奉國將軍東休鎮國中尉惟勝誥命冠服如制 刑科給事中吳世忠奏臣觀大同邊境視他鎮為尤重大同邊備視他鎮為尤廣請畧言之各邊墩臺率隔三四五里而大同隔十四五里者有之各鎮去邊墩率遠四五十里而大同遠一百八九十里者有之烽火不通策應不及此形勢之不便也將官推", "source_html": true, "context": [{"label": "Linked to", "value": "CBDB 67945: 吳世忠, born ?, died 1515, index year 1452. Postings: 都御史 -; 僉事 -; 尚寶司卿 -; 左參議 -; 兵科給事中 1491-; 刑科給事中 1497-1501; 戶科右給事中 1501-1502; 吏科左給事中 1502-1504"}, {"label": "How", "value": "office-in-text-dated (strong); 2 of 4 candidates left after the filters"}], "questions": [{"id": "q1", "type": "single", "prompt": "Is this the right person?", "notes": true, "candidates": [{"id": "right", "label": "Right"}, {"id": "wrong", "label": "Wrong"}, {"id": "cannot-tell", "label": "Cannot tell"}]}]}, {"id": "person|159-0003|見澤|67504", "heading": "person · 159-0003 · 1500-03-10 · “見澤”", "source": "崇王見澤奏乞河南歸德州等處黃河退灘地二十餘里下戶部議尚書周經等言崇王歲有常祿萬石又有先帝賜地二千五百餘頃今河南連年告災修造府第勞瘁萬狀前地皆軍民佃種輸稅之數若歸王府彼將何以為生況宗藩日盛若", "source_html": true, "context": [{"label": "Linked to", "value": "CBDB 67504: 朱見澤, born ?, died 1505, index year 1442. Postings: 崇王 1457-1505"}, {"label": "How", "value": "office-in-text-dated+朱 (weak); 1 of 1 candidates left after the filters"}], "questions": [{"id": "q1", "type": "single", "prompt": "Is this the right person?", "notes": true, "candidates": [{"id": "right", "label": "Right"}, {"id": "wrong", "label": "Wrong"}, {"id": "cannot-tell", "label": "Cannot tell"}]}]}, {"id": "person|078-0009|見浚|67509", "heading": "person · 078-0009 · 1493-08-25 · “見浚”", "source": "丁酉吉王見浚奏乞湖廣益陽縣稅課局課鈔戶部言國課有限諸王之求請者無窮宜勿許從之", "source_html": true, "context": [{"label": "Linked to", "value": "CBDB 67509: 朱見浚, born 1456, died 1527, index year 1456. Postings: 吉王 1457-1527"}, {"label": "How", "value": "office-in-text-dated+朱 (weak); 1 of 1 candidates left after the filters"}], "questions": [{"id": "q1", "type": "single", "prompt": "Is this the right person?", "notes": true, "candidates": [{"id": "right", "label": "Right"}, {"id": "wrong", "label": "Wrong"}, {"id": "cannot-tell", "label": "Cannot tell"}]}]}, {"id": "person|163-0086|宸濠|67356", "heading": "person · 163-0086 · 1500-08-02 · “宸濠”", "source": "封寧王宸濠生母馮氏為寧康王次妃從王請也", "source_html": true, "context": [{"label": "Linked to", "value": "CBDB 67356: 朱宸濠, born ?, died 1520, index year 1457. Postings: 上高王 -; 鎮國將軍 -1494; 鎮國將軍 -; 上高王 1494-1498; 寧王 1498-1519"}, {"label": "How", "value": "office-in-text-dated+朱 (weak); 1 of 1 candidates left after the filters"}], "questions": [{"id": "q1", "type": "single", "prompt": "Is this the right person?", "notes": true, "candidates": [{"id": "right", "label": "Right"}, {"id": "wrong", "label": "Wrong"}, {"id": "cannot-tell", "label": "Cannot tell"}]}]}, {"id": "person|050-0006|誠泳|34608", "heading": "person · 050-0006 · 1491-05-19 · “誠泳”", "source": "秦王誠泳奏著金王府軍職有犯徒杖等罪者俱調衛管事各府官廩地任散沒多訛小過以圖改用積久恐侍衛多缺抑亦中小人自便之計自今有犯公過者乞准文官例罰贖還職從之 命南京都察院右僉都御史王軾兼提督巡江", "source_html": true, "context": [{"label": "Linked to", "value": "CBDB 34608: 朱誠泳, born 1458, died 1498, index year 1458. Postings: 鎮安王 -; 鎮安王 1468-1488; 秦王 1488-"}, {"label": "How", "value": "office-in-text-dated+朱 (weak); 1 of 1 candidates left after the filters"}], "questions": [{"id": "q1", "type": "single", "prompt": "Is this the right person?", "notes": true, "candidates": [{"id": "right", "label": "Right"}, {"id": "wrong", "label": "Wrong"}, {"id": "cannot-tell", "label": "Cannot tell"}]}]}, {"id": "person|112-0045|洪漢|572385", "heading": "person · 112-0045 · 1496-06-09 · “洪漢”", "source": "丙申陞雲南布政司右布政使張撫爲貴州左布政使江西左叅政洪漢爲四川右布政使", "source_html": true, "context": [{"label": "Linked to", "value": "CBDB 572385: 洪漢, born ?, died ?, index year 1442. Postings: 布政使司參議 -; 戶部郎中 -; 糧儲道 -"}, {"label": "How", "value": "only-dated-candidate (weak); 2 of 2 candidates left after the filters"}], "questions": [{"id": "q1", "type": "single", "prompt": "Is this the right person?", "notes": true, "candidates": [{"id": "right", "label": "Right"}, {"id": "wrong", "label": "Wrong"}, {"id": "cannot-tell", "label": "Cannot tell"}]}]}, {"id": "person|215-0041|羅傑|219361", "heading": "person · 215-0041 · 1504-10-05 · “羅傑”", "source": "陞守備黃花鎮指揮使羅傑爲署都指揮僉事", "source_html": true, "context": [{"label": "Linked to", "value": "CBDB 219361: 羅傑, born ?, died ?, index year 1433. Postings: none recorded"}, {"label": "How", "value": "only-dated-candidate (weak); 3 of 6 candidates left after the filters"}], "questions": [{"id": "q1", "type": "single", "prompt": "Is this the right person?", "notes": true, "candidates": [{"id": "right", "label": "Right"}, {"id": "wrong", "label": "Wrong"}, {"id": "cannot-tell", "label": "Cannot tell"}]}]}, {"id": "person|052-0004|孫璧|262635", "heading": "person · 052-0004 · 1491-07-18 · “孫璧”", "source": "縣殺虜官民八百余人燒毀民居無算總鎮太監王敬總督都御史秦紘總兵官毛銳等奉命征剿以所調漢達官軍王兵人等分為五哨五路並進令參將陳崑按察使陶魯領之都指揮白玉自魚子水口進馬義自灊水江口進指揮孫璧自三州進安紀等自秣頭扶旋思麻等埠進李寅自南鄉舉進各與賊遇連戰敗之襲至雲孚太山與賊鏖戰賊大敗擒者十一人斬首五百二十八級俘獲賊屬百四十人及獲器械諸物捷聞 上命寅奏捷者新鈔千貫總鎮等官賜", "source_html": true, "context": [{"label": "Linked to", "value": "CBDB 262635: 孫璧, born ?, died ?, index year 1462. Postings: none recorded"}, {"label": "How", "value": "only-dated-candidate (weak); 2 of 6 candidates left after the filters"}], "questions": [{"id": "q1", "type": "single", "prompt": "Is this the right person?", "notes": true, "candidates": [{"id": "right", "label": "Right"}, {"id": "wrong", "label": "Wrong"}, {"id": "cannot-tell", "label": "Cannot tell"}]}]}, {"id": "person|051-0043|魏紳|133482", "heading": "person · 051-0043 · 1491-07-11 · “魏紳”", "source": "陞通政司左參議田景質為太常寺少卿大理寺右寺丞陳瑋為本寺左寺丞監察御史王嵩為大理寺右寺丞刑部郎中魏紳為南京大理寺右寺丞", "source_html": true, "context": [{"label": "Linked to", "value": "CBDB 133482: 魏紳, born ?, died ?, index year 1451. Postings: none recorded"}, {"label": "How", "value": "only-dated-candidate (weak); 2 of 3 candidates left after the filters"}], "questions": [{"id": "q1", "type": "single", "prompt": "Is this the right person?", "notes": true, "candidates": [{"id": "right", "label": "Right"}, {"id": "wrong", "label": "Wrong"}, {"id": "cannot-tell", "label": "Cannot tell"}]}]}, {"id": "person|224-0016|謝遷|34576", "heading": "person · 224-0016 · 1505-06-17 · “謝遷”", "source": "庚寅 上大漸曉刻遣司禮監太監戴義召內閣大學士劉使李東陽謝遷甚急至 乾清宮東暖閣 御榻前 上燕張生龍床御榻上健等入至牀上榻前叩頭問安 上曰熱甚不可耐命左右取水以布拭舌既乃曰朕嗣 祖宗大統一十八年今年三十六歲乃得此疾殆不能起健等跪奏曰 皇上偶", "source_html": true, "context": [{"label": "Linked to", "value": "CBDB 34576: 謝遷, born 1449, died 1531, index year 1449. Postings: 兵部尚書 -; 東閣大學士 -; 經筵講官 -; 少傅兼太子太傅 -; 少詹事 -; 侍讀學士 -; 太傅 -; 太子少保 -"}, {"label": "How", "value": "only-dated-candidate (weak); 3 of 3 candidates left after the filters"}], "questions": [{"id": "q1", "type": "single", "prompt": "Is this the right person?", "notes": true, "candidates": [{"id": "right", "label": "Right"}, {"id": "wrong", "label": "Wrong"}, {"id": "cannot-tell", "label": "Cannot tell"}]}]}, {"id": "person|057-0013|鍾鏞|199451", "heading": "person · 057-0013 · 1491-12-14 · “鍾鏞”", "source": "太原左衛軍馬使遂與其妻妾通凡軍婦之有色者使每引與鍾鈺姦因留不遣其後軍人郝俊等不從鍾鈺提金骨朵箠殺之以此死者八人以他事死者又九人惡少張鏊等十一人皆附之又收父妻李素真為官人與弟鎮國將軍鍾鏞不相能潛令人毀府其第門鐘鏞乃盡發鍾鈺諸不法事鍾鈺亦許鍾鏞不孝嫡母僭服蟒衣妾通樂婦諸事又訖舍餘李性竊寫鍾鏞所訟詞令教授張珊造詞奏辯俱下山西巡撫等官鞠之得實詔以鍾鈺姦收父妻強奪人妻又殘", "source_html": true, "context": [{"label": "Linked to", "value": "CBDB 199451: 鍾鏞, born 1446, died ?, index year 1446. Postings: none recorded"}, {"label": "How", "value": "only-dated-candidate (weak); 4 of 4 candidates left after the filters"}], "questions": [{"id": "q1", "type": "single", "prompt": "Is this the right person?", "notes": true, "candidates": [{"id": "right", "label": "Right"}, {"id": "wrong", "label": "Wrong"}, {"id": "cannot-tell", "label": "Cannot tell"}]}]}, {"id": "person|220-0070|顧佐|66995", "heading": "person · 220-0070 · 1505-03-04 · “顧佐”", "source": "己巳 命開中兩淮兩浙河東運司鹽一萬引于陝西寧夏諸邊 以備邊儲 仍發太谷銀三十萬兩以濟之 從戶部侍郎顧佐請也", "source_html": true, "context": [{"label": "Linked to", "value": "CBDB 66995: 顧佐, born 1443, died 1516, index year 1443. Postings: 都察院左僉都御史 -; 刑部郎中 -; 刑部員外郎 -; 左副都御史 -; 知府 -; 刑部主事 1469-; 副使 1480-; 知府 1483-1487"}, {"label": "How", "value": "only-dated-candidate (weak); 7 of 10 candidates left after the filters"}], "questions": [{"id": "q1", "type": "single", "prompt": "Is this the right person?", "notes": true, "candidates": [{"id": "right", "label": "Right"}, {"id": "wrong", "label": "Wrong"}, {"id": "cannot-tell", "label": "Cannot tell"}]}]}, {"id": "person|155-0075|史載德|200969", "heading": "person · 155-0075 · 1499-12-06 · “史載德”", "source": "巡按直隸監察御史史載德奏修築泰州運河隄岸三牛二百一十三丈請令所司給役夫工雇之直從之", "source_html": true, "context": [{"label": "Linked to", "value": "CBDB 200969: 史載德, born 1463, died ?, index year 1463. Postings: none recorded"}, {"label": "How", "value": "only-dated-candidate (weak); 2 of 3 candidates left after the filters"}], "questions": [{"id": "q1", "type": "single", "prompt": "Is this the right person?", "notes": true, "candidates": [{"id": "right", "label": "Right"}, {"id": "wrong", "label": "Wrong"}, {"id": "cannot-tell", "label": "Cannot tell"}]}]}, {"id": "person|031-0025|孔弘泰|126905", "heading": "person · 031-0025 · 1489-11-13 · “孔弘泰”", "source": "丙申衍聖公孔弘泰奏先聖五十九世孫舉人孔彥士學識優長乞選爲曲阜縣知縣吏部覆奏從之", "source_html": true, "context": [{"label": "Linked to", "value": "CBDB 126905: 孔弘泰, born 1450, died 1503, index year 1450. Postings: none recorded"}, {"label": "How", "value": "unique-fits-date (strong); 1 of 1 candidates left after the filters"}], "questions": [{"id": "q1", "type": "single", "prompt": "Is this the right person?", "notes": true, "candidates": [{"id": "right", "label": "Right"}, {"id": "wrong", "label": "Wrong"}, {"id": "cannot-tell", "label": "Cannot tell"}]}]}, {"id": "person|164-0095+1|李朝陽|200429", "heading": "person · 164-0095+1 · 1500-08-29 · “李朝陽”", "source": "丁丑賜楚府醴陵縣主并儀賓羅大倫青田縣君并儀賓趙恭桐鄉縣君并儀賓董文煥晉府松陽郡君并儀賓李朝陽誥命冠服如制 巡撫宣府都御史雍泰奏宣府遊擊將軍劉淮等領大同遊兵不能禦賊而又縱部下以鐵器與賊為市致生邊患不宜復用請以管操部指揮張雄代之命雄充宣府遊擊將軍淮止令在大同領軍殺賊", "source_html": true, "context": [{"label": "Linked to", "value": "CBDB 200429: 李朝陽, born 1450, died ?, index year 1450. Postings: none recorded"}, {"label": "How", "value": "unique-fits-date (strong); 1 of 10 candidates left after the filters"}], "questions": [{"id": "q1", "type": "single", "prompt": "Is this the right person?", "notes": true, "candidates": [{"id": "right", "label": "Right"}, {"id": "wrong", "label": "Wrong"}, {"id": "cannot-tell", "label": "Cannot tell"}]}]}, {"id": "person|192-0014|王益謙|343701", "heading": "person · 192-0014 · 1502-11-14 · “王益謙”", "source": "降右少監劉恭官三級仍分守遼陽恭在遼陽私役軍餘千餘人占種官地三百餘畝賊以千計為都御史陳瑤所劾下巡按監察御史勘之會虜寇東州大肆殺掠恭等失於防禦御史覆請罪之俱下勘事給事中鍾渤郎中王益謙覆覈逮問有旨罷其分守而恭復自疏乞留乃有是命於是兵部及科道各論其貪贓之罪乞罷 且言東州之收總兵孫文毅已生死罪恭不宜獨免不聽", "source_html": true, "context": [{"label": "Linked to", "value": "CBDB 343701: 王益謙, born ?, died ?, index year 1454. Postings: none recorded"}, {"label": "How", "value": "unique-fits-date (strong); 1 of 2 candidates left after the filters"}], "questions": [{"id": "q1", "type": "single", "prompt": "Is this the right person?", "notes": true, "candidates": [{"id": "right", "label": "Right"}, {"id": "wrong", "label": "Wrong"}, {"id": "cannot-tell", "label": "Cannot tell"}]}]}, {"id": "person|219-0044|李端澄|200457", "heading": "person · 219-0044 · 1505-02-03 · “李端澄”", "source": "虎仙謀召阿寧刺等六人者至立斬之國人遂不敢有他志甘肅守臣以聞請勅陝已還吾哈密諭奄寧刺及寫亦虎仙同心輔之以次收復土魯番所占刺木并哈密帖乞等城兵部覆奏從之是任也分守肅州參將吳鉉及兵備副使李端澄之力居多云", "source_html": true, "context": [{"label": "Linked to", "value": "CBDB 200457: 李端澄, born 1452, died ?, index year 1452. Postings: none recorded"}, {"label": "How", "value": "unique-fits-date (strong); 1 of 1 candidates left after the filters"}], "questions": [{"id": "q1", "type": "single", "prompt": "Is this the right person?", "notes": true, "candidates": [{"id": "right", "label": "Right"}, {"id": "wrong", "label": "Wrong"}, {"id": "cannot-tell", "label": "Cannot tell"}]}]}, {"id": "person|101-0044|譚肅|200087", "heading": "person · 101-0044 · 1495-07-24 · “譚肅”", "source": "乙亥陞南京監察御史譚肅為山西按察司僉事", "source_html": true, "context": [{"label": "Linked to", "value": "CBDB 200087: 譚肅, born 1438, died ?, index year 1438. Postings: none recorded"}, {"label": "How", "value": "unique-fits-date (strong); 1 of 1 candidates left after the filters"}], "questions": [{"id": "q1", "type": "single", "prompt": "Is this the right person?", "notes": true, "candidates": [{"id": "right", "label": "Right"}, {"id": "wrong", "label": "Wrong"}, {"id": "cannot-tell", "label": "Cannot tell"}]}]}, {"id": "person|122-0010|史書|199737", "heading": "person · 122-0010 · 1497-03-18 · “史書”", "source": "會同考察徑自奏請施行從之吏部又以科道所知在外諸不職官內布政使王崑僉事吳陟傅金張謙深黃寬黃華知府邵隆尚縉董復弋泰俱持身不謹請并罷軟無為僉事余琦俱令冠帶閒住參政李灝副使謝顯參議喬璫知府史書或有疾或無為請俱令致仕知府鄒重林表各才力不及請并行事平方布政使雍泰副使馮鎮趙炯明漢俱降級調用又以科道雖言雍泰平方而進撫都御史又薦泰廉明可用按察使吳倫通六科言其才力不及例應調用而十三", "source_html": true, "context": [{"label": "Linked to", "value": "CBDB 199737: 史書, born 1447, died ?, index year 1447. Postings: none recorded"}, {"label": "How", "value": "unique-fits-date (strong); 1 of 4 candidates left after the filters"}], "questions": [{"id": "q1", "type": "single", "prompt": "Is this the right person?", "notes": true, "candidates": [{"id": "right", "label": "Right"}, {"id": "wrong", "label": "Wrong"}, {"id": "cannot-tell", "label": "Cannot tell"}]}]}, {"id": "person|068-0008|謙|129830", "heading": "person · 068-0008 · 1492-11-02 · “殷謙”", "source": "辛丑致仕戶部尚書殷謙自陳在官勞績乞准致仕尚書薛遠例官其子監生璋為京職以便侍養吏科參云皇上嗣位重恤名器仕籍甫清謙今退居臥病之間亦當不忘廟堂之慮顧乃倡啟勞績為子奏求京職遠得僥倖於前謙遂效尤於後此門一開漸不", "source_html": true, "context": [{"label": "Linked to", "value": "CBDB 129830: 殷謙, born 1417, died 1504, index year 1417. Postings: 戶部主事 -"}, {"label": "How", "value": "unique-fits-date (strong); 1 of 3 candidates left after the filters"}], "questions": [{"id": "q1", "type": "single", "prompt": "Is this the right person?", "notes": true, "candidates": [{"id": "right", "label": "Right"}, {"id": "wrong", "label": "Wrong"}, {"id": "cannot-tell", "label": "Cannot tell"}]}]}, {"id": "person|177-0023|任良弼|127441", "heading": "person · 177-0023 · 1501-09-01 · “任良弼”", "source": "命故南京刑部侍郎阮勤之孫忠為國子監生從其請也刑科給事中任良弼言八事曰勤 聖學曰足武備曰正士風曰惜人才曰卹民力曰重邊臣曰撫邊民曰通邊餉命所司知之", "source_html": true, "context": [{"label": "Linked to", "value": "CBDB 127441: 任良弼, born ?, died ?, index year 1463. Postings: none recorded"}, {"label": "How", "value": "unique-fits-date (strong); 1 of 6 candidates left after the filters"}], "questions": [{"id": "q1", "type": "single", "prompt": "Is this the right person?", "notes": true, "candidates": [{"id": "right", "label": "Right"}, {"id": "wrong", "label": "Wrong"}, {"id": "cannot-tell", "label": "Cannot tell"}]}]}, {"id": "person|074-0067|宸濠|67356", "heading": "person · 074-0067 · 1493-05-17 · “宸濠”", "source": "丁巳先是寧靖王以罪革祿米之半後准復三之二至是其子宸濠襲封諸全夫如舊許之", "source_html": true, "context": [{"label": "Linked to", "value": "CBDB 67356: 朱宸濠, born ?, died 1520, index year 1457. Postings: 上高王 -; 鎮國將軍 -1494; 鎮國將軍 -; 上高王 1494-1498; 寧王 1498-1519"}, {"label": "How", "value": "unique-fits-date+朱 (weak); 1 of 1 candidates left after the filters"}], "questions": [{"id": "q1", "type": "single", "prompt": "Is this the right person?", "notes": true, "candidates": [{"id": "right", "label": "Right"}, {"id": "wrong", "label": "Wrong"}, {"id": "cannot-tell", "label": "Cannot tell"}]}]}, {"id": "person|051-0034|徵鈐|524627", "heading": "person · 051-0034 · 1491-07-05 · “徵鈐”", "source": "軍見洽嫡第三子曰祐楷吳丘王府輔國將軍威鎮長子曰聰渡陽曲王府鎮國將軍鍾鏡第五子曰奇浚溝府輔國將軍銓鋤第七子曰勳汪庋成王長子第六子曰表杜伊府方城王第二子曰訏冽嫡第三弟曰訏溫韓府鎮國將軍徵鈐子曰偕沾輔國將軍徵欽子曰偕漢徵鑣庋第五子曰偕灝遼府松滋王第四子曰恩錦嫡第二子曰寵泗", "source_html": true, "context": [{"label": "Linked to", "value": "CBDB 524627: 朱徵鈐, born ?, died ?, index year 1461. Postings: none recorded"}, {"label": "How", "value": "unique-fits-date+朱 (weak); 1 of 1 candidates left after the filters"}], "questions": [{"id": "q1", "type": "single", "prompt": "Is this the right person?", "notes": true, "candidates": [{"id": "right", "label": "Right"}, {"id": "wrong", "label": "Wrong"}, {"id": "cannot-tell", "label": "Cannot tell"}]}]}, {"id": "person|190-0040|見沛|67619", "heading": "person · 190-0040 · 1502-09-22 · “見沛”", "source": "日令司禮監奏請處治指揮賀勇等二十八人倉州吏目韓天爵等三一及軍餘十八人俱連逮罪生有差給歧惠王守墳者五戶從戶部奏也奉寧侯陳璇等一千一百六十人朝參不至錦衣衛鴻臚寺具名以請命罰俸各一月敝王見沛奏分王府儀賓選既不精教義無法至有邪淫放肆靡所不為者今後乞將年三十以下者送本處儒學讀書習禮以成厥德禮部覆奏宜從王所請凡儀賓年二十五下者不分新舊悉送本府州儒學讀書本學教官同長史司逐月考", "source_html": true, "context": [{"label": "Linked to", "value": "CBDB 67619: 朱見沛, born 1462, died 1505, index year 1462. Postings: 徽王 1466-"}, {"label": "How", "value": "unique-fits-date+朱 (weak); 1 of 1 candidates left after the filters"}], "questions": [{"id": "q1", "type": "single", "prompt": "Is this the right person?", "notes": true, "candidates": [{"id": "right", "label": "Right"}, {"id": "wrong", "label": "Wrong"}, {"id": "cannot-tell", "label": "Cannot tell"}]}]}, {"id": "person|067-0020|見溥|524831", "heading": "person · 067-0020 · 1492-10-13 · “見溥”", "source": "辛巳枵荆府荆靖王妃魏氏生子見瀾見溥夫人王氏生見溥魏氏鍾愛見溥凡金帛必倍與之見瀾不平靖王薨見瀾嗣住魏魏氏於宮中減去衣服飲食抑鬱而死見瀾怒不已令弑其柩自實聞以出遂欲殺見溥伴使人召之騎射既入令左右擁執自出鐵尺連善之見溥哀", "source_html": true, "context": [{"label": "Linked to", "value": "CBDB 524831: 朱見溥, born ?, died ?, index year 1466. Postings: none recorded"}, {"label": "How", "value": "unique-fits-date+朱 (weak); 1 of 1 candidates left after the filters"}], "questions": [{"id": "q1", "type": "single", "prompt": "Is this the right person?", "notes": true, "candidates": [{"id": "right", "label": "Right"}, {"id": "wrong", "label": "Wrong"}, {"id": "cannot-tell", "label": "Cannot tell"}]}]}, {"id": "person|020-0058|徵鏡|524633", "heading": "person · 020-0058 · 1489-01-05 · “徵鏡”", "source": "甲申賜韓府鎮國將軍徵銀庶第三子名曰借淋庶第四子曰借浚徵鐵庶子曰借湯輔國將軍徵鏡庶子曰借渣徵鑊嫡子曰借沮徵鑄嫡子曰借潤徵鋪庶子曰借洫徵鋒嫡子曰借湖徵鐵庶子曰借湑番府慶成王輔國將軍鍾鉤第四子曰奇浪鍾缺第二子曰奇酒", "source_html": true, "context": [{"label": "Linked to", "value": "CBDB 524633: 朱徵鏡, born ?, died ?, index year 1461. Postings: none recorded"}, {"label": "How", "value": "unique-fits-date+朱 (weak); 1 of 1 candidates left after the filters"}], "questions": [{"id": "q1", "type": "single", "prompt": "Is this the right person?", "notes": true, "candidates": [{"id": "right", "label": "Right"}, {"id": "wrong", "label": "Wrong"}, {"id": "cannot-tell", "label": "Cannot tell"}]}]}, {"id": "person|030-0016|見淑|524811", "heading": "person · 030-0016 · 1489-10-10 · “見淑”", "source": "楊泰禮科左給事中韓鼎戶科給事中祝僉吏科給事中林廷玉兵科給事中劉孟刑科左給事中趙汝工科給事中柴昇中書舍人傅潮吏部郎中周本戶部員外郎耿大睿充副使冊封唐世子灝歸為唐王妃蘇氏為唐王妃襄世子見淑為襄王寧府輔國將軍襄淳為石城王周王弟同鑄為新會王賴川溢傳王子鎮國將軍同鑄為賴川王夫人王氏為賴川王妃周王子鎮國將軍安淡為義寧王鎮國將軍安泛為平樂王鎮國將軍安涖為崇善王鎮國將軍安遠為海", "source_html": true, "context": [{"label": "Linked to", "value": "CBDB 524811: 朱見淑, born ?, died ?, index year 1466. Postings: none recorded"}, {"label": "How", "value": "unique-fits-date+朱 (weak); 1 of 1 candidates left after the filters"}], "questions": [{"id": "q1", "type": "single", "prompt": "Is this the right person?", "notes": true, "candidates": [{"id": "right", "label": "Right"}, {"id": "wrong", "label": "Wrong"}, {"id": "cannot-tell", "label": "Cannot tell"}]}]}, {"id": "person|159-0051|芝坦|524674", "heading": "person · 159-0051 · 1500-03-29 · “芝坦”", "source": "唐府新城王芝坦疑軍餘朱茂盜所支祿未將繫治之茂逃遂捕其子械繫東廄茂妻畢氏故出入芝坦所求宥不得陰縱之亡芝坦怒誘致畢氏令其長子彌鏡拷掠數百加以炮烙身無完膚遂死事聞刑部請論如法 上曰芝坦妄用炮烙慘刑致死", "source_html": true, "context": [{"label": "Linked to", "value": "CBDB 524674: 朱芝坦, born ?, died ?, index year 1450. Postings: none recorded"}, {"label": "How", "value": "unique-fits-date+朱 (weak); 1 of 1 candidates left after the filters"}], "questions": [{"id": "q1", "type": "single", "prompt": "Is this the right person?", "notes": true, "candidates": [{"id": "right", "label": "Right"}, {"id": "wrong", "label": "Wrong"}, {"id": "cannot-tell", "label": "Cannot tell"}]}]}, {"id": "person|020-0043|祁銳|525083", "heading": "person · 020-0043 · 1488-12-29 · “祁銳”", "source": "丁丑鄭府涇陽王祁銳薨王靖王庶第三子母夫人張氏宣德八年生止統八年同封涇陽王至是薨年五十六計閔朝一日賜祭葬如制諡曰安靖", "source_html": true, "context": [{"label": "Linked to", "value": "CBDB 525083: 朱祁銳, born ?, died ?, index year 1434. Postings: none recorded"}, {"label": "How", "value": "unique-fits-date+朱 (weak); 1 of 1 candidates left after the filters"}], "questions": [{"id": "q1", "type": "single", "prompt": "Is this the right person?", "notes": true, "candidates": [{"id": "right", "label": "Right"}, {"id": "wrong", "label": "Wrong"}, {"id": "cannot-tell", "label": "Cannot tell"}]}]}, {"id": "person|197-0044|陳曜|484543", "heading": "person · 197-0044 · 1503-04-27 · “陳曜”", "source": "先次報捷事相背馳請遣官按覈命大理寺左少卿吳一貫錦衣衛都指揮僉事楊玉性勘務得其實以聞巡按廣西監察御史陳策奏鎮守副總兵都督嚴藍布政司右叅政武清調湖廣都指揮李玉長沙衛指揮孫森桂林右衛指揮陳曜桂林中衛指揮宋昂等進剿古田賊黨指揮田綱等誘賊悉殺之賊復流劫臨桂義寧融縣諸路上昂第分道斬捕雖各有獲顧嚴藍武清不能設策防禦使餘賊復寇入紀律不嚴致賊猖獗俱宜速問但玉等功過相兼譬已陞湖廣鎮", "source_html": true, "context": [{"label": "Linked to", "value": "CBDB 484543: 陳曜, born ?, died ?, index year ?. Postings: 教諭 -"}, {"label": "How", "value": "unique-undated (weak); 1 of 2 candidates left after the filters"}], "questions": [{"id": "q1", "type": "single", "prompt": "Is this the right person?", "notes": true, "candidates": [{"id": "right", "label": "Right"}, {"id": "wrong", "label": "Wrong"}, {"id": "cannot-tell", "label": "Cannot tell"}]}]}, {"id": "person|017-0046|鄧槩|550714", "heading": "person · 017-0046 · 1488-10-05 · “鄧槩”", "source": "都察院左都御史馬文升以杜稷監宰御史張強誤事并責都事鄧槩槩恕因奏文升不責忠貞而喜趨媚裝虛勢而不明實理妄近名而不恤大體乞下法司勘問上曰鄧槩不服堂上官責罰還私捏奏本當重治姑宥之送吏部調外任", "source_html": true, "context": [{"label": "Linked to", "value": "CBDB 550714: 鄧槩, born ?, died ?, index year ?. Postings: 府同知 -; 僉事 -; 縣令 -; 知縣 -; 都察院都事 -"}, {"label": "How", "value": "unique-undated (weak); 1 of 1 candidates left after the filters"}], "questions": [{"id": "q1", "type": "single", "prompt": "Is this the right person?", "notes": true, "candidates": [{"id": "right", "label": "Right"}, {"id": "wrong", "label": "Wrong"}, {"id": "cannot-tell", "label": "Cannot tell"}]}]}, {"id": "person|088-0013|吳良|696952", "heading": "person · 088-0013 · 1494-06-22 · “吳良”", "source": "城兵馬司緝拏治罪各處鄉試因先年入場人衆難於供給俱有奏准定數遵行已久若不拘額數恐一時任意增添僥倖愈多徒爲紛擾 上是其議令只照奏准及見例行顯挾私奏擾并李英刑部俱違治二次流星例不占奏仍令吳良張紳其實以聞既而吳等伏罪 上曰爾輩職專占候天象失於占奏法當究治既伏罪姑宥之", "source_html": true, "context": [{"label": "Linked to", "value": "CBDB 696952: 吳良, born ?, died ?, index year ?. Postings: 副千戶 -; 管軍百戶 -; 昭信校尉 -"}, {"label": "How", "value": "unique-undated (weak); 1 of 5 candidates left after the filters"}], "questions": [{"id": "q1", "type": "single", "prompt": "Is this the right person?", "notes": true, "candidates": [{"id": "right", "label": "Right"}, {"id": "wrong", "label": "Wrong"}, {"id": "cannot-tell", "label": "Cannot tell"}]}]}, {"id": "person|145-0059|忱|459269", "heading": "person · 145-0059 · 1499-02-11 · “周忱”", "source": "命立祠祀故戶部尚書夏原吉工部尚書周忱于蘇州之胥門以常熟縣知縣楊子器言原吉嘗治水利忱巡撫督餉各有功於南漢故已", "source_html": true, "context": [{"label": "Linked to", "value": "CBDB 459269: 周忱, born ?, died ?, index year ?. Postings: 都御史 -; 廵撫 -"}, {"label": "How", "value": "unique-undated (weak); 1 of 2 candidates left after the filters"}], "questions": [{"id": "q1", "type": "single", "prompt": "Is this the right person?", "notes": true, "candidates": [{"id": "right", "label": "Right"}, {"id": "wrong", "label": "Wrong"}, {"id": "cannot-tell", "label": "Cannot tell"}]}]}, {"id": "person|062-0027|軫|452807", "heading": "person · 062-0027 · 1492-05-23 · “郭翰”", "source": "悅坐是久不遷成化二年巡撫畿內陞南京禮部尚書旋改禮部加太子少保累乞休命馳驛以歸月給米二石歲給徒夫四人弘治間浙江歲飢輸具疏聞奏 荐廟表其憂民勤有司備羊酒絲段帛之比至而輸已卒年八十四計開軫朝一日賜祭葬贈太子太保諡康靖軫體貌凜然若不勝衣清慎自持終始不變士論多之", "source_html": true, "context": [{"label": "Linked to", "value": "CBDB 452807: 郭翰, born ?, died ?, index year ?. Postings: 縣丞 -"}, {"label": "How", "value": "unique-undated (weak); 1 of 4 candidates left after the filters"}], "questions": [{"id": "q1", "type": "single", "prompt": "Is this the right person?", "notes": true, "candidates": [{"id": "right", "label": "Right"}, {"id": "wrong", "label": "Wrong"}, {"id": "cannot-tell", "label": "Cannot tell"}]}]}, {"id": "person|049-0033|柳景|523860", "heading": "person · 049-0033 · 1491-05-10 · “柳景”", "source": "時法司會鞫總督兩廣都御史秦紘所奏安遠侯柳景事坐景監守自蓋當新謂紘亦不能無罪有旨并違紘鞠之刑科左給事中趙竑等言兩廣之民惡景之貪暴服紘之廉正今景事已實而復違紘則人心失望監察御史史簡等亦以為言不聽", "source_html": true, "context": [{"label": "Linked to", "value": "CBDB 523860: 柳景, born ?, died ?, index year ?. Postings: none recorded"}, {"label": "How", "value": "unique-undated (weak); 1 of 1 candidates left after the filters"}], "questions": [{"id": "q1", "type": "single", "prompt": "Is this the right person?", "notes": true, "candidates": [{"id": "right", "label": "Right"}, {"id": "wrong", "label": "Wrong"}, {"id": "cannot-tell", "label": "Cannot tell"}]}]}, {"id": "person|198-0052|劉雲|490544", "heading": "person · 198-0052 · 1503-06-03 · “劉雲”", "source": "先是十三年冬北虜小王子率衆入河套住牧明年春侵入榆林波羅堡等處放兵四掠巡撫都御史周季麟同鎮守太監劉雲總兵官恭順侯吳鑑議留西安等衛原在還慶固原等處備冬官軍分守要害以都指揮僉事楊琳統之人支慶陽官庫銀一兩使備衣裝委整飭環慶兵備按察司副使于茂分給茂遂欲遁堂慶陽境內官軍季麟不許茂輒行之人給", "source_html": true, "context": [{"label": "Linked to", "value": "CBDB 490544: 劉雲, born ?, died ?, index year ?. Postings: none recorded"}, {"label": "How", "value": "unique-undated (weak); 1 of 7 candidates left after the filters"}], "questions": [{"id": "q1", "type": "single", "prompt": "Is this the right person?", "notes": true, "candidates": [{"id": "right", "label": "Right"}, {"id": "wrong", "label": "Wrong"}, {"id": "cannot-tell", "label": "Cannot tell"}]}]}, {"id": "person|167-0031|朱潔|523935", "heading": "person · 167-0031 · 1500-11-17 · “朱潔”", "source": "丁酉 上御奉天殿傳制懷寧侯孫泰陽武侯薛倫崇信伯賈柱彰武伯楊質興安伯徐盛南寧伯毛良武平伯陳勳懷柔伯施成安伯郭寧武進伯朱潔都察院右副都御史顧佐持節充王使尚寶司司丞崔璫吏科給事中周重兵科給事中王承裕刑科給事中任良弼工科右給事中李祿中書舍人尹雄劉銳吏部員外郎馮蘭戶部員外郎張定工部員外郎宋愷鴻臚寺左寺丞丁傳", "source_html": true, "context": [{"label": "Linked to", "value": "CBDB 523935: 朱潔, born ?, died ?, index year ?. Postings: none recorded"}, {"label": "How", "value": "unique-undated (weak); 1 of 1 candidates left after the filters"}], "questions": [{"id": "q1", "type": "single", "prompt": "Is this the right person?", "notes": true, "candidates": [{"id": "right", "label": "Right"}, {"id": "wrong", "label": "Wrong"}, {"id": "cannot-tell", "label": "Cannot tell"}]}]}, {"id": "person|065-0059|表櫟|524391", "heading": "person · 065-0059 · 1492-08-29 · “表櫟”", "source": "丙申賜靖江王府輔國將軍約慶藩府沁源王長子勛濠鎮國將軍勛淑并各夫人周府輔國將軍同鑾同鈺同鏞同鏘奉國將軍安濤晉府鎮國將軍表梅輔國將軍表櫟表棟奇派奇濬奇泗奇清奇沂奉國將軍表枰表枰奇沂奇汪奇浪表捍周府鎮國將軍安清輔國將軍安洫楚府鎮國將軍榮通鎮國中尉顯楨奉國將軍榮法誥命冠服如制", "source_html": true, "context": [{"label": "Linked to", "value": "CBDB 524391: 朱表櫟, born ?, died ?, index year ?. Postings: none recorded"}, {"label": "How", "value": "unique-undated+朱 (weak); 1 of 1 candidates left after the filters"}], "questions": [{"id": "q1", "type": "single", "prompt": "Is this the right person?", "notes": true, "candidates": [{"id": "right", "label": "Right"}, {"id": "wrong", "label": "Wrong"}, {"id": "cannot-tell", "label": "Cannot tell"}]}]}, {"id": "person|214-0047|祐桐|525044", "heading": "person · 214-0047 · 1504-09-05 · “祐桐”", "source": "曰成錄成鏗庶第三子曰德浹輔國將軍成測嫡長子曰德洩成鏗庶第二子曰德澣成鑑庶第三子曰德泳成鎬嫡第二子曰德通成銳嫡長子曰德浣聰濬嫡長子曰俊梭嫡第二子曰俊棫趙府廣安王嫡長子曰厚燭汝源王長子祐桐庶長子曰厚煥第二子曰厚煥第三子曰厚燭濬府穀山王嫡第四子曰勛鳳唐山王嫡第一子曰胤楠鎮國將軍詮銘嫡第四子曰勛澤詮鏊嫡第五子曰勛潤遼府益陽王庶第五子曰寵沅長子寵濬嫡第二子曰致樺輔國將軍恩", "source_html": true, "context": [{"label": "Linked to", "value": "CBDB 525044: 朱祐桐, born ?, died ?, index year ?. Postings: none recorded"}, {"label": "How", "value": "unique-undated+朱 (weak); 1 of 1 candidates left after the filters"}], "questions": [{"id": "q1", "type": "single", "prompt": "Is this the right person?", "notes": true, "candidates": [{"id": "right", "label": "Right"}, {"id": "wrong", "label": "Wrong"}, {"id": "cannot-tell", "label": "Cannot tell"}]}]}, {"id": "person|012-0033|成鑠|565401", "heading": "person · 012-0033 · 1488-05-08 · “成鑠”", "source": "壬午賜晉府輔國將軍成鋐成鑠并各夫人誥命冠服如制", "source_html": true, "context": [{"label": "Linked to", "value": "CBDB 565401: 朱成鑠, born ?, died ?, index year ?. Postings: none recorded"}, {"label": "How", "value": "unique-undated+朱 (weak); 1 of 1 candidates left after the filters"}], "questions": [{"id": "q1", "type": "single", "prompt": "Is this the right person?", "notes": true, "candidates": [{"id": "right", "label": "Right"}, {"id": "wrong", "label": "Wrong"}, {"id": "cannot-tell", "label": "Cannot tell"}]}]}, {"id": "person|053-0022|祐材|524816", "heading": "person · 053-0022 · 1491-08-21 · “祐材”", "source": "賜襄府世孫祐材四書集註一部從王請也", "source_html": true, "context": [{"label": "Linked to", "value": "CBDB 524816: 朱祐材, born ?, died ?, index year ?. Postings: none recorded"}, {"label": "How", "value": "unique-undated+朱 (weak); 1 of 1 candidates left after the filters"}], "questions": [{"id": "q1", "type": "single", "prompt": "Is this the right person?", "notes": true, "candidates": [{"id": "right", "label": "Right"}, {"id": "wrong", "label": "Wrong"}, {"id": "cannot-tell", "label": "Cannot tell"}]}]}, {"id": "person|083-0019|表榮|524387", "heading": "person · 083-0019 · 1494-01-26 · “表榮”", "source": "辛未晉世孫表榮卒世孫晉世子奇源之子母妃楊氏成化三年生十四封為世孫至是卒年二十五賜祭葬如鎮國將軍例弘治十六年連封為晉王謚曰懷", "source_html": true, "context": [{"label": "Linked to", "value": "CBDB 524387: 朱表榮, born ?, died ?, index year ?. Postings: none recorded"}, {"label": "How", "value": "unique-undated+朱 (weak); 1 of 1 candidates left after the filters"}], "questions": [{"id": "q1", "type": "single", "prompt": "Is this the right person?", "notes": true, "candidates": [{"id": "right", "label": "Right"}, {"id": "wrong", "label": "Wrong"}, {"id": "cannot-tell", "label": "Cannot tell"}]}]}, {"id": "person|165-0033|安泛|524434", "heading": "person · 165-0033 · 1500-09-17 · “安泛”", "source": "革周府義寧王安湊爵廢平樂王安泛為庶人徙之鳳陽初周惠王無嫡子庶長子安濬封為世子安湊安泛以次受封惠王常不事事安濬等競為非度各置囹圄刑具招集無賴為私人擊斷亡諱而安泛尤甚後惠王以安濬械繫祥符民高玘等責償負錢戒之不從乃大", "source_html": true, "context": [{"label": "Linked to", "value": "CBDB 524434: 朱安泛, born ?, died ?, index year ?. Postings: none recorded"}, {"label": "How", "value": "unique-undated+朱 (weak); 1 of 1 candidates left after the filters"}], "questions": [{"id": "q1", "type": "single", "prompt": "Is this the right person?", "notes": true, "candidates": [{"id": "right", "label": "Right"}, {"id": "wrong", "label": "Wrong"}, {"id": "cannot-tell", "label": "Cannot tell"}]}]}, {"id": "person|018-0033|見洸|525019", "heading": "person · 018-0033 · 1488-10-29 · “見洸”", "source": "郎貢欽戶部郎中江漢員外郎陳綸兵部員外郎熊祿充副使冊封秦府秦惠王庶長子鎮安王誠洙為秦王妃廖氏為秦王妃岷府岷世子膺鉦為岷王妃莊氏為岷王妃趙府湯陰莊僖王嫡長子見準為湯陰王平鄉榮順王庶長子見洸為平鄉王晉府寧河康僖王嫡長子鍾鑲為寧河王夫人汪氏為寧河王妃楚府楚王嫡長子榮誠為楚世子荆府荆王第五子祐禪為桐城王周府鄢陵安僖王庶第二子鎮國將軍同鑾為鄢陵王夫人張氏為鄢陵王妃山西行都司", "source_html": true, "context": [{"label": "Linked to", "value": "CBDB 525019: 朱見洸, born ?, died ?, index year ?. Postings: none recorded"}, {"label": "How", "value": "unique-undated+朱 (weak); 1 of 1 candidates left after the filters"}], "questions": [{"id": "q1", "type": "single", "prompt": "Is this the right person?", "notes": true, "candidates": [{"id": "right", "label": "Right"}, {"id": "wrong", "label": "Wrong"}, {"id": "cannot-tell", "label": "Cannot tell"}]}]}, {"id": "person|013-0050|彥泥|524587", "heading": "person · 013-0050 · 1488-06-17 · “彥泥”", "source": "曰安忠庶第七子曰安濩魯陽王庶第三子曰安海泰府鎮安王鎮國將軍公鏜庶第四子曰誠濠泰國將軍誠濤嫡第六子曰秉徽誠濤庶長子曰秉柯輔府通渭王子曰偕浪蜀府汝川王嫡第二子曰賓沙峴府峴世子庶第二子曰彥泥靈立王鎮將軍成錯嫡子曰聰濤濤府沁水王嫡第三子曰勛漢輔國將軍金錯嫡長子曰勛梁嫡第二子曰勛流金綢嫡第四子曰勛泰嫡第五子曰勛沐慶府真寧王嫡長子寔鏡子曰台淳達府枝江王子曰寵潤鎮國將軍思鎔嫡", "source_html": true, "context": [{"label": "Linked to", "value": "CBDB 524587: 朱彥泥, born ?, died ?, index year ?. Postings: none recorded"}, {"label": "How", "value": "unique-undated+朱 (weak); 1 of 1 candidates left after the filters"}], "questions": [{"id": "q1", "type": "single", "prompt": "Is this the right person?", "notes": true, "candidates": [{"id": "right", "label": "Right"}, {"id": "wrong", "label": "Wrong"}, {"id": "cannot-tell", "label": "Cannot tell"}]}]}, {"id": "place|184-0050|貴州|hvd_112052", "heading": "place · 184-0050 · 1502-04-06 · “貴州”", "source": "南京戶部右侍郎鄭紀乞致仕不允 令巡撫貴州都察院右副都御史汪鑒致仕以給事中張文監察御史葉永秀劾其非撫取才也", "source_html": true, "context": [{"label": "Linked to", "value": "TGAZ hvd_112052: 貴州布政使司 (布政司), 1414-1644, at 106.70911, 26.58078"}, {"label": "How", "value": "highest-level (weak); 2 of 2 candidates left after the filters"}], "questions": [{"id": "q1", "type": "single", "prompt": "Is this the right place?", "notes": true, "candidates": [{"id": "right", "label": "Right"}, {"id": "wrong", "label": "Wrong"}, {"id": "cannot-tell", "label": "Cannot tell"}]}]}, {"id": "place|215-0024|雲南|hvd_112062", "heading": "place · 215-0024 · 1504-09-30 · “雲南”", "source": "禮科給事中張維新等會勘雲南都指揮孫輔千戶王洪通判文獻指揮張捷陳應等承委督兵勦捕貴州賊朱魯之黨乃委指揮夷為賊擒斬以冒功賞輔所計土舍後搜捕山谷殺虜男女有萬走潞河死者擬王洪張捷等三十五人深當斬大獻陳勳等十二人當絞", "source_html": true, "context": [{"label": "Linked to", "value": "TGAZ hvd_112062: 雲南布政使司 (布政司), 1382-1644, at 102.71035, 25.04591"}, {"label": "How", "value": "highest-level (weak); 2 of 2 candidates left after the filters"}], "questions": [{"id": "q1", "type": "single", "prompt": "Is this the right place?", "notes": true, "candidates": [{"id": "right", "label": "Right"}, {"id": "wrong", "label": "Wrong"}, {"id": "cannot-tell", "label": "Cannot tell"}]}]}, {"id": "place|145-0072|永平|hvd_88304", "heading": "place · 145-0072 · 1499-02-16 · “永平”", "source": "戊午整飭薊州等處都御史洪鐘奏薊州永平偏臨虜境素無營壘易出沒閭多軍少分布不及欲將薊州遵化以東十四衛京操官軍九百二十人存留本地防守事下兵部復奏從之", "source_html": true, "context": [{"label": "Linked to", "value": "TGAZ hvd_88304: 永平府 (府), 1374-1724, at 118.86195, 39.87732"}, {"label": "How", "value": "highest-level (weak); 2 of 2 candidates left after the filters"}], "questions": [{"id": "q1", "type": "single", "prompt": "Is this the right place?", "notes": true, "candidates": [{"id": "right", "label": "Right"}, {"id": "wrong", "label": "Wrong"}, {"id": "cannot-tell", "label": "Cannot tell"}]}]}, {"id": "place|114-0015|大同|hvd_115139", "heading": "place · 114-0015 · 1496-07-24 · “大同”", "source": "虜入大同石門兒墩等處殺墩卒二人命守墩官下巡按御史逮問罰守備都指揮閻福体兩月分守右叅將秦恭傳一月與分守太監左教守備監丞郭玉俱戴罪殺賊", "source_html": true, "context": [{"label": "Linked to", "value": "TGAZ hvd_115139: 大同府 (府), 936-1911, at 113.29639, 40.09284"}, {"label": "How", "value": "highest-level (weak); 2 of 2 candidates left after the filters"}], "questions": [{"id": "q1", "type": "single", "prompt": "Is this the right place?", "notes": true, "candidates": [{"id": "right", "label": "Right"}, {"id": "wrong", "label": "Wrong"}, {"id": "cannot-tell", "label": "Cannot tell"}]}]}, {"id": "place|203-0027|河南|hvd_112053", "heading": "place · 203-0027 · 1503-10-13 · “河南”", "source": "民艱食請勅大臣一人往浙江才幹部屬二人往直隸賑之戶部議謂都御史王璫嘗奉命清理兩淮鹽法今已事故請令璫就巡視浙江起復副使汪舜民銓註山東按察司住淮揚其廬風則兼委管屯餉事閭里各隨宜賑濟又山東河南湖廣南北直隸亦多有被災州縣請通行巡撫巡按等官各如例賑恤從之", "source_html": true, "context": [{"label": "Linked to", "value": "TGAZ hvd_112053: 河南布政使司 (布政司), 1376-1644, at 114.34333, 34.78548"}, {"label": "How", "value": "highest-level (weak); 2 of 2 candidates left after the filters"}], "questions": [{"id": "q1", "type": "single", "prompt": "Is this the right place?", "notes": true, "candidates": [{"id": "right", "label": "Right"}, {"id": "wrong", "label": "Wrong"}, {"id": "cannot-tell", "label": "Cannot tell"}]}]}, {"id": "place|224-0015|建寧|hvd_90005", "heading": "place · 224-0015 · 1505-06-16 · “建寧”", "source": "詳審查看過工料之數聞奏戶部議覆整理大同等處軍餉郡御史閻仲宇所言籌邊事宜一惟征常賦謂山西河南等處當輸大同宣府二鎮民糧屯糧往往積滯數月以督徵無紀也今宜令大同及山西行都司所屬者責成於冀北建寧巡官宣府所屬者責成於口北道分巡僉事過期不完者守巡等官罰府州縣官俸巡撫及管糧卽中罰守巡及新司管屯官俸河南等處亦如此例行一減省浪費謂舊各邊按伙人馬始支與草料今在城聽征者亦累月支給矣舊例", "source_html": true, "context": [{"label": "Linked to", "value": "TGAZ hvd_90005: 建寧府 (府), 1455-1733, at 0.00000, 27.038860"}, {"label": "How", "value": "highest-level (weak); 3 of 3 candidates left after the filters"}], "questions": [{"id": "q1", "type": "single", "prompt": "Is this the right place?", "notes": true, "candidates": [{"id": "right", "label": "Right"}, {"id": "wrong", "label": "Wrong"}, {"id": "cannot-tell", "label": "Cannot tell"}]}]}, {"id": "place|121-0030|保定|hvd_87647", "heading": "place · 121-0030 · 1497-03-05 · “保定”", "source": "初尚膳監奉御趙瑄跪列直隸保定府雄縣等處開地獻馬東官官莊戶部奏瑄違例後獻以啟利端宜治其罪有旨下瑄錦衣衛俱撫司言各處閭田必因民間所得不均致生忿怒遂有侵獻之圖請遣官勘實居民佃種起科或入官別用詔遣內外官各一人會巡撫巡", "source_html": true, "context": [{"label": "Linked to", "value": "TGAZ hvd_87647: 保定府 (府), 1369-1733, at 115.50209, 38.85570"}, {"label": "How", "value": "highest-level (weak); 2 of 2 candidates left after the filters"}], "questions": [{"id": "q1", "type": "single", "prompt": "Is this the right place?", "notes": true, "candidates": [{"id": "right", "label": "Right"}, {"id": "wrong", "label": "Wrong"}, {"id": "cannot-tell", "label": "Cannot tell"}]}]}, {"id": "place|196-0047|武昌|hvd_105002", "heading": "place · 196-0047 · 1503-03-31 · “武昌”", "source": "以水旱灾允湖廣黃州漢陽荊州等六府沔陽州及武昌等八衛所弘治十五年稅糧子粒有差", "source_html": true, "context": [{"label": "Linked to", "value": "TGAZ hvd_105002: 江夏县 (府), 1380-1911, at 114.30666, 30.57367"}, {"label": "How", "value": "highest-level (weak); 4 of 4 candidates left after the filters"}], "questions": [{"id": "q1", "type": "single", "prompt": "Is this the right place?", "notes": true, "candidates": [{"id": "right", "label": "Right"}, {"id": "wrong", "label": "Wrong"}, {"id": "cannot-tell", "label": "Cannot tell"}]}]}, {"id": "place|129-0028|廣東|hvd_98246", "heading": "place · 129-0028 · 1497-10-21 · “廣東”", "source": "時暹羅國進金葉表文而四夷館未有專設暹羅國譯字官表文無能譯辨大學士徐淳等以為請上曰既無曉暹通事禮部其行文廣東布政司訪取精通本國言語文字者一二人起送聽用", "source_html": true, "context": [{"label": "Linked to", "value": "TGAZ hvd_98246: 廣東布政使司 (布政司), 1376-1561, at 0.00000, 23.134620"}, {"label": "How", "value": "same-place-duplicate (medium); 3 of 3 candidates left after the filters"}], "questions": [{"id": "q1", "type": "single", "prompt": "Is this the right place?", "notes": true, "candidates": [{"id": "right", "label": "Right"}, {"id": "wrong", "label": "Wrong"}, {"id": "cannot-tell", "label": "Cannot tell"}]}]}, {"id": "place|131-0026|鳳陽府|hvd_91192", "heading": "place · 131-0026 · 1497-12-15 · “鳳陽府”", "source": "巡撫直隸監察御史韓普奉例考察請照老疾不謹等官揚州府同知潘賢等三十八員吏部覆奏且請留內歷任未及二年鳳陽府推官傅景良等五員辦事從之", "source_html": true, "context": [{"label": "Linked to", "value": "TGAZ hvd_91192: 鳳陽府 (府), 1389-1723, at 0.00000, 32.865350"}, {"label": "How", "value": "same-place-duplicate (strong); 2 of 2 candidates left after the filters"}], "questions": [{"id": "q1", "type": "single", "prompt": "Is this the right place?", "notes": true, "candidates": [{"id": "right", "label": "Right"}, {"id": "wrong", "label": "Wrong"}, {"id": "cannot-tell", "label": "Cannot tell"}]}]}, {"id": "place|119-0005|江西|hvd_98234", "heading": "place · 119-0005 · 1496-12-16 · “江西”", "source": "丙午江西布政司右參議姜祥丁憂朕聞後塗湖廣布政司", "source_html": true, "context": [{"label": "Linked to", "value": "TGAZ hvd_98234: 江西布政使司 (布政司), 1376-1561, at 0.00000, 28.674900"}, {"label": "How", "value": "same-place-duplicate (medium); 3 of 3 candidates left after the filters"}], "questions": [{"id": "q1", "type": "single", "prompt": "Is this the right place?", "notes": true, "candidates": [{"id": "right", "label": "Right"}, {"id": "wrong", "label": "Wrong"}, {"id": "cannot-tell", "label": "Cannot tell"}]}]}, {"id": "place|155-0015|鄖陽|hvd_34319", "heading": "place · 155-0015 · 1499-11-14 · “鄖陽”", "source": "令守備劉崔都指揮僉事黃素佐理湖廣行都司軍政從撫治鄖陽都御史蔡福奏也", "source_html": true, "context": [{"label": "Linked to", "value": "TGAZ hvd_34319: 鄖陽府 (府), 1476-1911, at 110.81399, 32.83374"}, {"label": "How", "value": "same-place-duplicate (medium); 2 of 2 candidates left after the filters"}], "questions": [{"id": "q1", "type": "single", "prompt": "Is this the right place?", "notes": true, "candidates": [{"id": "right", "label": "Right"}, {"id": "wrong", "label": "Wrong"}, {"id": "cannot-tell", "label": "Cannot tell"}]}]}, {"id": "place|187-0067|常州|hvd_90206", "heading": "place · 187-0067 · 1502-07-13 · “常州”", "source": "總陝西軍務尚書秦鑑上邊徭事宜謂禦戎之道當以守徭為本平涼北四百餘里舊有據望城固靖莊三百餘里舊有石峽口及雙峯臺城此皆建賊入寇總路最宜設徭欲將此三處修完分兵防守東興環慶北興常州烽火相傳互為應援此第一阨也進而稍南內有野處軍民已為隨山修堡使皆險固可依又有西安州鎮戍所海剌都打剌赤黑水口乾鹽池撒都城犬牙參錯此第二阨也又進而南則有固原衛靖虜衛平羅堡一條城東山城白楊", "source_html": true, "context": [{"label": "Linked to", "value": "TGAZ hvd_90206: 常州府 (府), 1367-1911, at 0.00000, 31.782780"}, {"label": "How", "value": "same-place-duplicate (medium); 2 of 2 candidates left after the filters"}], "questions": [{"id": "q1", "type": "single", "prompt": "Is this the right place?", "notes": true, "candidates": [{"id": "right", "label": "Right"}, {"id": "wrong", "label": "Wrong"}, {"id": "cannot-tell", "label": "Cannot tell"}]}]}, {"id": "place|161-0050|太原府|hvd_94017", "heading": "place · 161-0050 · 1500-05-29 · “太原府”", "source": "山西太原府天鼓鳴", "source_html": true, "context": [{"label": "Linked to", "value": "TGAZ hvd_94017: 太原府 (府), 1376-1594, at 0.00000, 0.00000"}, {"label": "How", "value": "same-place-duplicate (strong); 2 of 2 candidates left after the filters"}], "questions": [{"id": "q1", "type": "single", "prompt": "Is this the right place?", "notes": true, "candidates": [{"id": "right", "label": "Right"}, {"id": "wrong", "label": "Wrong"}, {"id": "cannot-tell", "label": "Cannot tell"}]}]}, {"id": "place|205-0018|延平府|hvd_90019", "heading": "place · 205-0018 · 1503-12-09 · “延平府”", "source": "甲戌陞福建延平府同知丁隆為廣西按察司僉事", "source_html": true, "context": [{"label": "Linked to", "value": "TGAZ hvd_90019: 延平府 (府), 1471-1535, at 0.00000, 26.642170"}, {"label": "How", "value": "same-place-duplicate (strong); 2 of 2 candidates left after the filters"}], "questions": [{"id": "q1", "type": "single", "prompt": "Is this the right place?", "notes": true, "candidates": [{"id": "right", "label": "Right"}, {"id": "wrong", "label": "Wrong"}, {"id": "cannot-tell", "label": "Cannot tell"}]}]}, {"id": "place|086-0002|梧州|hvd_35451", "heading": "place · 086-0002 · 1494-05-06 · “梧州”", "source": "檢司增設土官副巡檢一員其近賊之地原無巡檢司者亦多設土官副巡檢以治之又兩廣舊設遊擊將軍後因事裁革賊遂縱橫乞復設以便擊賊兵部覆議謂宜添設副巡檢有罪者一體降罰有功者子孫傳襲遊擊將軍令常在梧州聽調殺賊從之 山東登州府地震有聲遼東蓋州衛地震有聲如雷次日復震", "source_html": true, "context": [{"label": "Linked to", "value": "TGAZ hvd_35451: 梧州府 (府), 1377-1724, at 111.30857, 23.48690"}, {"label": "How", "value": "same-place-duplicate (medium); 2 of 2 candidates left after the filters"}], "questions": [{"id": "q1", "type": "single", "prompt": "Is this the right place?", "notes": true, "candidates": [{"id": "right", "label": "Right"}, {"id": "wrong", "label": "Wrong"}, {"id": "cannot-tell", "label": "Cannot tell"}]}]}, {"id": "place|155-0084|山西|hvd_112059", "heading": "place · 155-0084 · 1499-12-11 · “山西”", "source": "增置河南磁州車騎鋪巡檢司更行山西選指揮一人至磁州屯營兼管催糧捕盜", "source_html": true, "context": [{"label": "Linked to", "value": "TGAZ hvd_112059: 山西布政使司 (布政司), 1376-1644, at 112.56483, 37.87375"}, {"label": "How", "value": "unique (medium); 1 of 1 candidates left after the filters"}], "questions": [{"id": "q1", "type": "single", "prompt": "Is this the right place?", "notes": true, "candidates": [{"id": "right", "label": "Right"}, {"id": "wrong", "label": "Wrong"}, {"id": "cannot-tell", "label": "Cannot tell"}]}]}, {"id": "place|105-0039|清源縣|hvd_95624", "heading": "place · 105-0039 · 1495-11-13 · “清源縣”", "source": "行陳氏浙江烏程縣民尹士安妻劉氏直隸呂黎縣民白瑛妻廩人直隸上海縣民孔瑜妻許氏直隸瀋陽中屯衛副千戶何敬妻穎人江西寧都縣民蘇克璋妻鄭淑婉福建莆田縣民陳銓妻祝氏浙江寧海縣儒士許漳妻王氏山西清源縣民侯景新妻周氏江西萬安縣民劉廣妻董氏浙江龍游縣民勞裁是妻王氏山西靜樂縣民徐亨泰妻董氏濬陽中屯衛百戶高宇妻張氏江西新昌縣民漆修德妻江氏民劉習恭妻萬氏民張鳳翔妻史氏陝西岐山縣舉人梁茂妻", "source_html": true, "context": [{"label": "Linked to", "value": "TGAZ hvd_95624: 清源縣 (县), 618-1762, at 112.50900, 37.55718"}, {"label": "How", "value": "unique (strong); 1 of 1 candidates left after the filters"}], "questions": [{"id": "q1", "type": "single", "prompt": "Is this the right place?", "notes": true, "candidates": [{"id": "right", "label": "Right"}, {"id": "wrong", "label": "Wrong"}, {"id": "cannot-tell", "label": "Cannot tell"}]}]}, {"id": "place|139-0026|南京|hvd_30033", "heading": "place · 139-0026 · 1498-08-15 · “南京”", "source": "是日已刻南京天鳴有聲", "source_html": true, "context": [{"label": "Linked to", "value": "TGAZ hvd_30033: 南京 (京師), 1441-1644, at 118.76899, 32.05256"}, {"label": "How", "value": "unique (strong); 1 of 1 candidates left after the filters"}], "questions": [{"id": "q1", "type": "single", "prompt": "Is this the right place?", "notes": true, "candidates": [{"id": "right", "label": "Right"}, {"id": "wrong", "label": "Wrong"}, {"id": "cannot-tell", "label": "Cannot tell"}]}]}, {"id": "place|173-0142|陝西|hvd_112060", "heading": "place · 173-0142 · 1501-05-21 · “陝西”", "source": "陞福建布政司左參政俞俊爲山東右布政使陝西按察司僉事胡俾爲本司副使", "source_html": true, "context": [{"label": "Linked to", "value": "TGAZ hvd_112060: 陝西布政使司 (布政司), 1376-1644, at 108.90698, 34.24642"}, {"label": "How", "value": "unique (medium); 1 of 1 candidates left after the filters"}], "questions": [{"id": "q1", "type": "single", "prompt": "Is this the right place?", "notes": true, "candidates": [{"id": "right", "label": "Right"}, {"id": "wrong", "label": "Wrong"}, {"id": "cannot-tell", "label": "Cannot tell"}]}]}, {"id": "place|079-0050|巴陵縣|hvd_42101", "heading": "place · 079-0050 · 1493-10-18 · “巴陵縣”", "source": "妻張氏順天府固安縣民陳庸妻黃氏直隸山海衛軍龍昇妻李氏福建仙遊縣民郭長吉妻謝氏陝西平涼衛安東千戶所軍餘張瑄妻趙氏福建建安縣民滕奎妻李氏福建閩縣民林克從妻范氏浙江安吉縣民徐珪妻李氏湖廣巴陵縣民謝紀妻俱守節年久無玷各旌表其門曰貞節", "source_html": true, "context": [{"label": "Linked to", "value": "TGAZ hvd_42101: 巴陵縣 (县), 1381-1911, at 113.09766, 29.37126"}, {"label": "How", "value": "unique (strong); 1 of 1 candidates left after the filters"}], "questions": [{"id": "q1", "type": "single", "prompt": "Is this the right place?", "notes": true, "candidates": [{"id": "right", "label": "Right"}, {"id": "wrong", "label": "Wrong"}, {"id": "cannot-tell", "label": "Cannot tell"}]}]}, {"id": "place|160-0015|四川|hvd_112061", "heading": "place · 160-0015 · 1500-04-17 · “四川”", "source": "四川高撒軍民府土官知府安得遣小土官沙也等以歲例來貢禮部以沙也等過期始至請如例減賞賜之半送之", "source_html": true, "context": [{"label": "Linked to", "value": "TGAZ hvd_112061: 四川布政使司 (布政司), 1376-1644, at 104.07800, 30.65039"}, {"label": "How", "value": "unique (medium); 1 of 1 candidates left after the filters"}], "questions": [{"id": "q1", "type": "single", "prompt": "Is this the right place?", "notes": true, "candidates": [{"id": "right", "label": "Right"}, {"id": "wrong", "label": "Wrong"}, {"id": "cannot-tell", "label": "Cannot tell"}]}]}, {"id": "place|109-0049|山東|hvd_112058", "heading": "place · 109-0049 · 1496-03-12 · “山東”", "source": "命山東布政司修理孟子廟宇從其五十七代孫翰林院五經博士敬請也", "source_html": true, "context": [{"label": "Linked to", "value": "TGAZ hvd_112058: 山東布政使司 (布政司), 1376-1644, at 117.00149, 36.65013"}, {"label": "How", "value": "unique (medium); 1 of 1 candidates left after the filters"}], "questions": [{"id": "q1", "type": "single", "prompt": "Is this the right place?", "notes": true, "candidates": [{"id": "right", "label": "Right"}, {"id": "wrong", "label": "Wrong"}, {"id": "cannot-tell", "label": "Cannot tell"}]}]}, {"id": "place|197-0020|福建|hvd_30019", "heading": "place · 197-0020 · 1503-04-15 · “福建”", "source": "錄福建沙縣平賊功陞九品散官者十二人給賞者三百八十六人賞鎮守太監鄧原綏段二表裡巡按監察御史陳玉一表裡", "source_html": true, "context": [{"label": "Linked to", "value": "TGAZ hvd_30019: 福建布政使司 (布政司), 1376-1644, at 119.32158, 26.07395"}, {"label": "How", "value": "unique (medium); 1 of 1 candidates left after the filters"}], "questions": [{"id": "q1", "type": "single", "prompt": "Is this the right place?", "notes": true, "candidates": [{"id": "right", "label": "Right"}, {"id": "wrong", "label": "Wrong"}, {"id": "cannot-tell", "label": "Cannot tell"}]}]}];
+
+// ---- theme + locale ----------------------------------------------------------
+if (CONFIG.theme) { for (const k in CONFIG.theme) document.documentElement.style.setProperty(k, CONFIG.theme[k]); }
+if (CONFIG.cjk) {
+  const s = document.createElement('style');
+  s.textContent = '.source,.cand-title,.cand-excerpt,.q-prompt,.context{word-break:break-all;}';
+  document.head.appendChild(s);
+}
+document.getElementById('doc-title').textContent = CONFIG.title || 'Review';
+const subEl = document.getElementById('doc-subtitle');
+if (CONFIG.subtitle) subEl.textContent = CONFIG.subtitle; else subEl.style.display = 'none';
+document.title = CONFIG.title || 'Review';
+
+const STORAGE_KEY = 'her::' + (CONFIG.storage_key || CONFIG.title || 'review');
+
+// ---- state -------------------------------------------------------------------
+const state = {};                         // qi -> answer object
+const QLIST = [];                         // {qi,item,q,block}
+function defState(){ return {selected:{}, none:false, rating:null, value:null, notes:''}; }
+
+DATA.forEach(item => (item.questions || []).forEach(q => {
+  const qi = QLIST.length;
+  const s = defState();
+  (q.candidates || []).concat(q.excluded || []).forEach(c => { if (c.preselected) s.selected[c.id] = true; });
+  if (q.type === 'boolean' && (q.default === true || q.default === false)) s.value = q.default;
+  if (q.type === 'rating' && q.default != null) s.rating = q.default;
+  if (q.type === 'text' && q.default) s.value = q.default;
+  state[qi] = s;
+  QLIST.push({ qi, item, q, block: null });
+}));
+const TOTAL = QLIST.length;
+
+// ---- helpers -----------------------------------------------------------------
+function el(tag, cls){ const e = document.createElement(tag); if (cls) e.className = cls; return e; }
+function scoreClass(s){ return s >= 80 ? 'score-high' : s >= 50 ? 'score-med' : 'score-low'; }
+function isReviewed(qi){
+  const s = state[qi], t = QLIST[qi].q.type;
+  if (t === 'match' || t === 'single') return Object.values(s.selected).some(Boolean) || s.none;
+  if (t === 'rating') return s.rating != null;
+  if (t === 'boolean') return s.value === true || s.value === false;
+  if (t === 'text') return (s.value || '').trim().length > 0;
+  return false;
+}
+
+// ---- render ------------------------------------------------------------------
+const root = document.getElementById('root');
+
+function render(){
+  root.innerHTML = '';
+  DATA.forEach((item, idx) => {
+    const card = el('div', 'entry');
+    card.id = 'entry-' + idx;
+
+    const head = el('div', 'entry-header');
+    const num = el('span', 'entry-num');
+    num.textContent = item.heading || ('Item ' + (idx + 1));
+    head.appendChild(num);
+    const badge = el('span', 'reviewed-badge'); badge.textContent = 'Reviewed';
+    head.appendChild(badge);
+    card.appendChild(head);
+
+    if (item.source != null && item.source !== '') {
+      const src = el('div', 'source');
+      if (item.source_html) src.innerHTML = item.source; else src.textContent = item.source;
+      card.appendChild(src);
+    }
+    if (Array.isArray(item.context) && item.context.length) {
+      const ctx = el('div', 'context');
+      item.context.forEach(c => {
+        const row = el('div', 'ctx-row');
+        const lab = el('span', 'ctx-label'); lab.textContent = c.label + ': ';
+        row.appendChild(lab); row.appendChild(document.createTextNode(c.value));
+        ctx.appendChild(row);
+      });
+      card.appendChild(ctx);
+    }
+
+    (item.questions || []).forEach(q => {
+      const qi = QLIST.findIndex(e => e.item === item && e.q === q);
+      const qBlock = renderQuestion(qi, q);
+      QLIST[qi].block = card;          // focus highlights at card level
+      card.appendChild(qBlock);
+    });
+
+    updateCardReviewed(card, item);
+    root.appendChild(card);
+  });
+  updateProgress();
+}
+
+function renderQuestion(qi, q){
+  const block = el('div', 'question');
+  block.dataset.qi = qi;
+  if (q.prompt) { const p = el('div', 'q-prompt'); p.textContent = q.prompt; block.appendChild(p); }
+
+  if (q.type === 'match' || q.type === 'single') renderCandidates(block, qi, q);
+  else if (q.type === 'rating') renderRating(block, qi, q);
+  else if (q.type === 'boolean') renderBoolean(block, qi, q);
+  else if (q.type === 'text') renderText(block, qi, q);
+
+  if (q.notes) renderNotes(block, qi);
+  if (isReviewed(qi)) block.classList.add('reviewed');
+  return block;
+}
+
+function candRow(qi, q, cand, input_type){
+  const li = el('li');
+  const label = el('label', 'cand');
+  const input = el('input');
+  input.type = input_type;
+  input.className = 'cand-input';
+  input.dataset.qi = qi;
+  input.dataset.id = cand.id;
+  if (input_type === 'radio') input.name = 'q-' + qi;
+  input.checked = !!state[qi].selected[cand.id];
+  input.addEventListener('change', () => onCandChange(qi, q));
+  label.appendChild(input);
+
+  if (cand.label != null && cand.label !== '') {
+    const d = el('span', 'cand-id'); d.textContent = cand.label; label.appendChild(d);
+  }
+  const main = el('div', 'cand-main');
+  if (cand.title) { const t = el('div', 'cand-title'); t.textContent = cand.title; main.appendChild(t); }
+  if (cand.excerpt) { const e = el('div', 'cand-excerpt'); e.innerHTML = cand.excerpt; main.appendChild(e); }
+  if (cand.reason) { const r = el('div', 'cand-reason'); r.textContent = cand.reason; main.appendChild(r); }
+  label.appendChild(main);
+  if (typeof cand.score === 'number') {
+    const sc = el('span', 'cand-score ' + scoreClass(cand.score)); sc.textContent = '(' + cand.score + ')';
+    label.appendChild(sc);
+  }
+  li.appendChild(label);
+  return li;
+}
+
+function renderCandidates(block, qi, q){
+  const list = el('ul', 'cand-list');
+  const cands = q.candidates || [];
+  const itype = q.type === 'single' ? 'radio' : 'checkbox';
+  if (!cands.length && !(q.excluded && q.excluded.length)) {
+    const nc = el('div', 'no-candidates'); nc.textContent = 'No candidates.'; block.appendChild(nc);
+  }
+  cands.forEach(c => list.appendChild(candRow(qi, q, c, itype)));
+
+  if (q.allow_none) {
+    const li = candRow(qi, q, { id: '__none__', title: 'None of the above' }, itype);
+    li.firstChild.classList.add('none-row');
+    li.querySelector('.cand-input').classList.remove('cand-input');
+    li.querySelector('input').classList.add('none-input');
+    li.querySelector('input').addEventListener('change', () => onNoneChange(qi, q));
+    li.querySelector('input').checked = !!state[qi].none;
+    li.firstChild.classList.add('none-host');
+    list.appendChild(li);
+  }
+  block.appendChild(list);
+
+  if (q.excluded && q.excluded.length) {
+    const det = el('details', 'excluded');
+    const sum = el('summary'); sum.textContent = 'Show ' + q.excluded.length + ' excluded candidate' + (q.excluded.length > 1 ? 's' : '');
+    det.appendChild(sum);
+    const exList = el('ul', 'cand-list');
+    q.excluded.forEach(c => exList.appendChild(candRow(qi, q, c, itype)));
+    det.appendChild(exList);
+    block.appendChild(det);
+  }
+}
+
+function renderRating(block, qi, q){
+  const scale = q.scale || { min: 1, max: 5 };
+  const row = el('div', 'rating-row');
+  for (let v = scale.min; v <= scale.max; v++) {
+    const b = el('button', 'rate-btn'); b.type = 'button'; b.dataset.val = v;
+    b.textContent = (scale.labels && scale.labels[v]) ? scale.labels[v] : v;
+    if (state[qi].rating === v) b.classList.add('active');
+    b.addEventListener('click', () => { state[qi].rating = v; afterChange(qi); refreshRating(block, qi); });
+    row.appendChild(b);
+  }
+  block.appendChild(row);
+  if (scale.caption) { const c = el('div', 'rate-caption'); c.textContent = scale.caption; block.appendChild(c); }
+}
+function refreshRating(block, qi){ block.querySelectorAll('.rate-btn').forEach(b => b.classList.toggle('active', Number(b.dataset.val) === state[qi].rating)); }
+
+function renderBoolean(block, qi, q){
+  const labels = q.labels || { yes: 'Yes', no: 'No' };
+  const row = el('div', 'rating-row');
+  const mk = (val, text, cls) => {
+    const b = el('button', 'bool-btn'); b.type = 'button'; b.dataset.bool = val ? '1' : '0'; b.textContent = text;
+    if (state[qi].value === val) b.classList.add(cls);
+    b.addEventListener('click', () => { state[qi].value = (state[qi].value === val ? null : val); afterChange(qi); refreshBool(block, qi, labels); });
+    return b;
+  };
+  row.appendChild(mk(true, labels.yes, 'active-yes'));
+  row.appendChild(mk(false, labels.no, 'active-no'));
+  block.appendChild(row);
+}
+function refreshBool(block, qi, labels){
+  block.querySelectorAll('.bool-btn').forEach(b => {
+    const val = b.dataset.bool === '1';
+    b.classList.toggle('active-yes', val === true && state[qi].value === true);
+    b.classList.toggle('active-no', val === false && state[qi].value === false);
+  });
+}
+
+function renderText(block, qi, q){
+  const ta = el('textarea', 'text-answer'); ta.rows = q.rows || 2;
+  ta.placeholder = q.placeholder || 'Enter your answer…';
+  ta.value = state[qi].value || '';
+  ta.addEventListener('input', () => { state[qi].value = ta.value; afterChange(qi, true); });
+  block.appendChild(ta);
+}
+
+function renderNotes(block, qi){
+  const wrap = el('div', 'notes-wrap');
+  const lab = el('div', 'notes-label'); lab.textContent = 'Notes'; wrap.appendChild(lab);
+  const ta = el('textarea', 'notes-input'); ta.rows = 1;
+  ta.placeholder = 'Optional notes…';
+  ta.value = state[qi].notes || '';
+  ta.addEventListener('input', () => { state[qi].notes = ta.value; save(); });
+  wrap.appendChild(ta);
+  block.appendChild(wrap);
+}
+
+// ---- change handlers ---------------------------------------------------------
+function onCandChange(qi, q){
+  if (q.type === 'single') {
+    state[qi].selected = {};
+    const checked = document.querySelector('.cand-input[data-qi="' + qi + '"]:checked');
+    if (checked) state[qi].selected[checked.dataset.id] = true;
+    state[qi].none = false;
+    const none = document.querySelector('.none-input[data-qi="' + qi + '"]'); if (none) none.checked = false;
+  } else {
+    state[qi].selected = {};
+    document.querySelectorAll('.cand-input[data-qi="' + qi + '"]').forEach(i => { if (i.checked) state[qi].selected[i.dataset.id] = true; });
+    if (Object.keys(state[qi].selected).length) {
+      state[qi].none = false;
+      const none = document.querySelector('.none-input[data-qi="' + qi + '"]'); if (none) none.checked = false;
+    }
+  }
+  afterChange(qi);
+}
+
+function onNoneChange(qi, q){
+  const none = document.querySelector('.none-input[data-qi="' + qi + '"]');
+  state[qi].none = none ? none.checked : false;
+  if (state[qi].none) {
+    state[qi].selected = {};
+    document.querySelectorAll('.cand-input[data-qi="' + qi + '"]').forEach(i => i.checked = false);
+  }
+  afterChange(qi);
+}
+
+function afterChange(qi, skipProgressFlash){
+  const block = document.querySelector('.question[data-qi="' + qi + '"]');
+  if (block) block.classList.toggle('reviewed', isReviewed(qi));
+  const card = document.getElementById('entry-' + DATA.indexOf(QLIST[qi].item));
+  if (card) updateCardReviewed(card, QLIST[qi].item);
+  updateProgress();
+  save();
+}
+
+function updateCardReviewed(card, item){
+  const qis = QLIST.filter(e => e.item === item).map(e => e.qi);
+  const allDone = qis.length > 0 && qis.every(isReviewed);
+  card.classList.toggle('reviewed', allDone);
+}
+
+function updateProgress(){
+  let done = 0;
+  for (let i = 0; i < TOTAL; i++) if (isReviewed(i)) done++;
+  document.getElementById('progress-counter').textContent = done + ' / ' + TOTAL + ' reviewed';
+  document.getElementById('progress-bar').style.width = (TOTAL ? (done / TOTAL * 100) : 0) + '%';
+}
+
+// ---- results: serialize / apply ----------------------------------------------
+function serialize(){
+  const results = QLIST.map(e => {
+    const s = state[e.qi], q = e.q;
+    const r = { item_id: e.item.id, question_id: q.id, type: q.type, reviewed: isReviewed(e.qi) };
+    if (e.item.heading) r.item_heading = e.item.heading;
+    if (e.item.source != null) r.source = e.item.source;
+    if (q.prompt) r.prompt = q.prompt;
+    if (q.type === 'match' || q.type === 'single') {
+      r.selected = Object.keys(s.selected).filter(k => s.selected[k]);
+      r.none = !!s.none;
+    } else if (q.type === 'rating') r.rating = s.rating;
+    else if (q.type === 'boolean') r.value = s.value;
+    else if (q.type === 'text') r.text = s.value || '';
+    if (q.notes) r.notes = s.notes || '';
+    return r;
+  });
+  const reviewed = results.filter(r => r.reviewed).length;
+  return { title: CONFIG.title, subtitle: CONFIG.subtitle || null, exported_at: new Date().toISOString(),
+           reviewed_count: reviewed, total: TOTAL, results };
+}
+
+function applyResults(obj){
+  if (!obj || !Array.isArray(obj.results)) return 0;
+  const byKey = {};
+  QLIST.forEach(e => { byKey[e.item.id + ' ' + e.q.id] = e.qi; });
+  let n = 0;
+  obj.results.forEach(r => {
+    const qi = byKey[r.item_id + ' ' + r.question_id];
+    if (qi == null) return;
+    const s = state[qi];
+    s.selected = {}; (r.selected || []).forEach(id => s.selected[id] = true);
+    s.none = !!r.none;
+    if ('rating' in r) s.rating = r.rating;
+    if ('value' in r) s.value = r.value;
+    if ('text' in r) s.value = r.text;
+    if ('notes' in r) s.notes = r.notes;
+    n++;
+  });
+  render();
+  return n;
+}
+
+// ---- persistence -------------------------------------------------------------
+function save(){ try { localStorage.setItem(STORAGE_KEY, JSON.stringify(serialize())); } catch (e) {} }
+
+function download(){
+  const json = JSON.stringify(serialize(), null, 2);
+  const blob = new Blob([json], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = el('a'); a.href = url; a.download = CONFIG.result_filename || 'review_results.json';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+}
+
+document.getElementById('download-btn').addEventListener('click', download);
+document.getElementById('load-btn').addEventListener('click', () => document.getElementById('load-input').click());
+document.getElementById('load-input').addEventListener('change', ev => {
+  const file = ev.target.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => { try { const n = applyResults(JSON.parse(reader.result)); flash('Loaded ' + n + ' answer' + (n === 1 ? '' : 's') + ' from file.'); save(); } catch (e) { flash('Could not read that file.'); } };
+  reader.readAsText(file);
+  ev.target.value = '';
+});
+
+// ---- restore banner ----------------------------------------------------------
+const banner = document.getElementById('restore-banner');
+function flash(msg){ document.getElementById('restore-text').textContent = msg; banner.classList.add('show'); }
+document.getElementById('restore-discard').addEventListener('click', () => {
+  try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
+  for (let i = 0; i < TOTAL; i++) state[i] = defState();
+  DATA.forEach(item => (item.questions || []).forEach(q => {
+    const qi = QLIST.findIndex(e => e.item === item && e.q === q);
+    (q.candidates || []).concat(q.excluded || []).forEach(c => { if (c.preselected) state[qi].selected[c.id] = true; });
+  }));
+  render(); banner.classList.remove('show');
+});
+
+// ---- keyboard navigation -----------------------------------------------------
+let focusIdx = -1;
+function setFocus(i){
+  if (!TOTAL) return;
+  focusIdx = Math.max(0, Math.min(TOTAL - 1, i));
+  const card = QLIST[focusIdx].block;
+  document.querySelectorAll('.entry.kbd-focus').forEach(c => { if (c !== card) c.classList.remove('kbd-focus'); });
+  if (card) { card.classList.add('kbd-focus'); card.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+}
+function actDigit(d){
+  if (focusIdx < 0) return;
+  const e = QLIST[focusIdx], q = e.q, qi = e.qi;
+  if (q.type === 'rating') {
+    const scale = q.scale || { min: 1, max: 5 };
+    const v = scale.min + (d - 1);
+    if (v <= scale.max) { const b = QLIST[focusIdx].block.querySelector('.rate-btn[data-val="' + v + '"]'); if (b) b.click(); }
+  } else if (q.type === 'boolean') {
+    const b = QLIST[focusIdx].block.querySelectorAll('.bool-btn')[d - 1]; if (b) b.click();
+  } else if (q.type === 'match' || q.type === 'single') {
+    const inputs = QLIST[focusIdx].block.querySelectorAll('.cand-input,.none-input');
+    const inp = inputs[d - 1]; if (inp) inp.click();
+  }
+}
+document.addEventListener('keydown', ev => {
+  const tag = (ev.target.tagName || '').toLowerCase();
+  const typing = tag === 'textarea' || tag === 'input' || tag === 'select';
+  if (ev.key === 'Escape') { document.getElementById('help-overlay').classList.remove('show'); if (typing) ev.target.blur(); return; }
+  if (typing) return;
+  if (ev.key === '?' || (ev.shiftKey && ev.key === '/')) { ev.preventDefault(); toggleHelp(); return; }
+  if (ev.key === 'j' || ev.key === 'ArrowDown') { ev.preventDefault(); setFocus(focusIdx < 0 ? 0 : focusIdx + 1); }
+  else if (ev.key === 'k' || ev.key === 'ArrowUp') { ev.preventDefault(); setFocus(focusIdx < 0 ? 0 : focusIdx - 1); }
+  else if (ev.key === 'n') { if (focusIdx >= 0) { const none = QLIST[focusIdx].block.querySelector('.none-input'); if (none) none.click(); } }
+  else if (/^[1-9]$/.test(ev.key)) { actDigit(Number(ev.key)); }
+});
+
+// ---- help overlay ------------------------------------------------------------
+function toggleHelp(){ document.getElementById('help-overlay').classList.toggle('show'); }
+document.getElementById('help-btn').addEventListener('click', toggleHelp);
+document.getElementById('help-close').addEventListener('click', toggleHelp);
+document.getElementById('help-overlay').addEventListener('click', ev => { if (ev.target.id === 'help-overlay') toggleHelp(); });
+
+// ---- boot --------------------------------------------------------------------
+render();
+try {
+  const saved = localStorage.getItem(STORAGE_KEY);
+  if (saved) { const n = applyResults(JSON.parse(saved)); if (n) flash('Restored your in-progress review from this browser.'); }
+} catch (e) {}
+</script>
+</body>
+</html>
